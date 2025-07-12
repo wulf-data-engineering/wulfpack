@@ -1,8 +1,7 @@
 # ADR‑001 — Static SPA with Selective SSG for Web Deliverables
 
-**Status**: Proposed
-**Date**: 2025‑07‑11
-**Deciders**: Tool‑set maintainers
+**Status**: Proposed  
+**Date**: 2025‑07‑11  
 
 ---
 
@@ -17,7 +16,7 @@ Key characteristics:
 | Routing            | SvelteKit’s file‑based router; browser history API.                                                                                              |
 | Build output       | Pure static assets (HTML + JS + CSS + images) emitted by `@sveltejs/adapter-static`.                                                             |
 | Deployment target  | Amazon S3 bucket + CloudFront (compression & caching); **optional Lambda\@Edge** for SPA fallback & redirects.                                   |
-| Language & tooling | TypeScript (executed via **Deno** runtime), Vite, ESLint, Prettier.                                                                              |
+| Language & tooling | TypeScript (executed via **Node.js/npm** runtime), Vite, ESLint, Prettier.                                                                     |
 | QA tooling         | **vitest** for unit tests (in `src/`), **Playwright** for UI/E2E tests (in `tests/`).                                                            |
 
 ### Lambda\@Edge responsibilities
@@ -39,13 +38,13 @@ SSG delivers the maximum benefit from AWS’s low‑cost static hosting model wh
 
 Developers starting a new project MUST:
 
-1. **Generate the project** with `/templates/frontend` (see §3).
+1. **Generate the project** with the root cookiecutter template (see §3).
    The template ships with `adapter-static` pre‑configured and a canonical `svelte.config.ts`.
 2. **Mark prerenderable routes** in `+page.server.ts` with `export const prerender = true;` to opt into SSG.
    Omit (or set to `false`) on pages that require per‑session data.
 3. **Keep all stateful API calls** in `src/lib/api/**` modules using the shared Protobuf/JSON client.
    This separation avoids accidental fetches during `svelte-kit prerender`.
-4. **Run `deno task preview:ssg`** locally; the task serves the `build/` folder via `vite preview`, showing exactly what CloudFront will serve.
+4.  **Run `npm run preview:ssg`** locally; the task serves the `build/` folder via `vite preview`, showing exactly what CloudFront will serve.
 5. \*\*Push to any branch → GitHub Action builds the static site and executes all tests but **does not deploy**.
    Push to **`main`** → Action builds, deploys the artifact to the **staging** S3/CloudFront stack, then runs smoke, UI, and E2E tests. If all checks pass, the *same artifact* is automatically promoted to **production** without rebuilding.
 
@@ -59,19 +58,12 @@ Rules of thumb:
 
 ---
 
-## 3. Tool‑Set Support
+## 3. Tool-Set Support
 
-| Tool‑set component                               | How it enforces / simplifies the decision                                                                                                                                                                                                                         |
-| ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`/templates/frontend`**                        | Cookiecutter template that scaffolds a SvelteKit app with: `adapter-static`, TypeScript strict mode, Playwright, vitest, and axe-playwright pre-wired. Unit tests are placed next to the files in `src/`, and Playwright tests are in `tests/`. |
-| **`/libraries/frontend/eslint-config`**          | Central ESLint/Prettier/Tailwind config enforcing the coding standards.                                                                                                                                                                                           |
-| **`deno.jsonc` & `/scripts`**                    | Shared **Deno tasks** (e.g., `deno task format`, `deno task lint`, `deno task build:ssg`) and a locked permissions manifest to standardize local & CI commands.                                                                                                   |
-| **`/iac/cdk/static‑spa-stack.ts`**               | CDK construct exposing `StaticSpaStack(siteName, { domain, certificateArn })` which: 1) provisions the S3 bucket; 2) attaches a CloudFront distro with proper cache‑control & security headers; 3) adds an optional Lambda\@Edge for SPA fallback (`index.html`). |
-| **CI/CD pipeline** (`.github/workflows/web.yml`) | `deno task ci:install` → `deno task build:ssg` → upload `build/` artifact → deploy to **staging** S3/CloudFront → run smoke, UI, and E2E tests → on success promote the same artifact to **production** and invalidate CloudFront caches.                         |
-| **Gemini CLI prompt pack**                       | Contains “When generating UI components, assume a static‑site SvelteKit app using adapter‑static.” This keeps AI suggestions aligned.                                                                                                                             |
-| **Docs** (`/docs/ssg-guidelines.md`)             | Explains prerender flags, cache invalidation, and route design patterns.                                                                                                                                                                                          |
+The Cookiecutter template `templates/{{cookiecutter.project_slug}}` scaffolds the monorepo with the folder `frontend`
+with the SvelteKit application prepared for SSG with unit using vitest and end-to-end tests using Playwright.
 
-Future enhancements (tracked separately):
+### Future enhancements (tracked separately):
 
 * Incremental rebuilds via `svelte-kit sync` and CloudFront selective invalidation.
 * Optional ISR (Incremental Static Regeneration) once supported natively in SvelteKit.

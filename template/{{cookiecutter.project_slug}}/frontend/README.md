@@ -1,0 +1,32 @@
+# {{ cookiecutter.project_name }} Frontend
+
+This directory contains the frontend application using **SvelteKit** with **TypeScript**.
+It is designed to be a self-contained static single-page application.
+
+The application is rendered with **static-site generation (SSG)** via `@sveltejs/adapter-static`. 
+
+**Node.js** with **npm** is used as runtime.
+
+**Vitest** is used for unit tests placed alongside the source code in `src/`.
+
+**Playwright** is used for end-to-end and UI testing in `e2e/`.
+
+## Developing
+
+- `npm run dev`: Starts the development server.
+
+## Building
+
+- `npm run build`: Builds the application for production.
+- `npm run preview`: Previews the production build locally.
+- `npm run prepare`: Synchronizes SvelteKit's generated types (usually run automatically by npm).
+- `npm run format`: Formats all files with Prettier.
+- `npm run proto:gen`: Generates code from protobuf definitions _(not yet implemented)_.
+
+## Testing
+
+- `npm run test`: Runs all unit and end-to-end tests once.
+- `npm run test:unit`: Runs unit tests with Vitest in watch mode.
+- `npm run test:e2e`: Runs end-to-end tests with Playwright (requires `npx playwright install`).
+- `npm run check`: Runs Svelte's type checker to find issues in your code.
+- `npm run lint`: Checks for formatting and linting errors.

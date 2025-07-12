@@ -1,0 +1,7 @@
+{
+  "project_name": "Tool-Set Frontend",
+  "project_slug": "{{ cookiecutter.project_name.lower().replace(' ', '-') }}",
+  "project_description": "A Tool-Set frontend application.",
+  "author_name": "Your Name",
+  "author_email": "your@email.com"
+}

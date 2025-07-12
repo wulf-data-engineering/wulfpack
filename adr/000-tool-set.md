@@ -1,22 +1,22 @@
 # ADR‑000 — Packaging & Test Strategy for the Tool‑Set Repository
 
-**Status**: Proposed
-**Date**: 2025‑07‑11
-**Deciders**: Tool‑set maintainers
+**Status**: Proposed  
+**Date**: 2025‑07‑11  
 
 ---
 
 ## 1. Design & Technology Decision
 
-The **tool‑set itself** (templates, libraries, CDK constructs, docs) will be treated as a production‑grade software product.  We therefore adopt a multi‑layer test pyramid and a predictable packaging flow:
+The **tool‑set itself** (template its frontend, backend code, CDK constructs and docs) will be treated as a production‑grade software product.
+We therefore adopt a multi‑layer test pyramid and a predictable packaging flow:
 
-| Level                        | Scope                                                  | Framework                                       | Trigger             |
-| ---------------------------- | ------------------------------------------------------ | ----------------------------------------------- | ------------------- |
-| **Lint / Format**            | All source files                                       | `deno task lint`, `cargo fmt`, ESLint, Prettier | PR                  |
-| **Unit tests**               | Rust crates & Deno/TS libs                             | `cargo nextest`, `deno test`                    | PR                  |
-| **Snapshot / Static tests**  | CDK constructs                                         | `aws-cdk/assertions`, `cdk-watchful snapshot`   | PR                  |
-| **Template smoke tests**     | Generate minimal app → compile & run its own tests     | Custom script                                   | PR                  |
-| **End‑to‑end tool‑set test** | Full example app (PWA + Lambda) deployed to LocalStack | Playwright + k6                                 | merge to main       |
+| Level                        | Scope                                                  | Framework                                     | Trigger             |
+| ---------------------------- | ------------------------------------------------------ |-----------------------------------------------| ------------------- |
+| **Lint / Format**            | All source files                                       | `npm run lint`, `cargo fmt`, ESLint, Prettier | PR                  |
+| **Unit tests**               | Rust crates & Deno/TS libs                             | `cargo nextest`, `npm run test`               | PR                  |
+| **Snapshot / Static tests**  | CDK constructs                                         | `aws-cdk/assertions`, `cdk-watchful snapshot` | PR                  |
+| **Template smoke tests**     | Generate minimal app → compile & run its own tests     | Custom script                                 | PR                  |
+| **End‑to‑end tool‑set test** | Full example app (PWA + Lambda) deployed to LocalStack | Playwright + k6                               | merge to main       |
 
 Packaging outputs:
 
@@ -33,9 +33,9 @@ Versioning: Semantic Versioning **per package**, with a mono‑tag `vX.Y.Z` for 
 1. **Local dev**
 
    ```bash
-   deno task lint        # JS/TS & yaml
+   npm run lint        # JS/TS & yaml
    cargo nextest -p all  # Rust
-   deno test             # Deno libs
+   npm run tes           # Deno libs
    ./scripts/test-cdk.sh # Synth + assertions
    ./scripts/test-template.sh web-basic
    ```
