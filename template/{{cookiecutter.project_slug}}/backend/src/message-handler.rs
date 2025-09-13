@@ -8,8 +8,7 @@ use lambda_runtime::{run, service_fn, tracing, Error, LambdaEvent};
 /// - https://github.com/awslabs/aws-lambda-rust-runtime/tree/main/examples
 /// - https://github.com/aws-samples/serverless-rust-demo/
 async fn function_handler(event: LambdaEvent<SqsEvent>) -> Result<(), Error> {
-    // Extract some useful information from the request
-
+    tracing::info!("Received {} SQS messages", event.payload.records.len());
     Ok(())
 }
 

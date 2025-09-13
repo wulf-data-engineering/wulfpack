@@ -1,11 +1,12 @@
 [package]
-name = "api"
+name = "backend"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-lambda_http = "0.13.0"
-aws_lambda_events = { version = "0.15.1", default-features = false, features = ["sqs", "cognito"] }
+lambda_runtime = "0.14.4"
+lambda_http = "0.17.0"
+aws_lambda_events = { version = "0.18.0", default-features = false, features = ["sqs", "cognito"] }
 
 tokio = { version = "1", features = ["macros"] }
 
@@ -20,3 +21,7 @@ path = "src/cognito-handler.rs"
 [[bin]]
 name = "message-handler"
 path = "src/message-handler.rs"
+
+[profile.release]
+codegen-units = 1 # Reduce binary size by compiling all code in one unit
+lto = "fat" # Enable best link-time optimization to reduce binary size
