@@ -1,7 +1,17 @@
 {
   "project_name": "Tool-Set Frontend",
-  "project_slug": "{{ cookiecutter.project_name.lower().replace(' ', '-') }}",
+  "project_slug": "{[ cookiecutter.project_name.lower().replace(' ', '-') ]}",
   "project_description": "A Tool-Set frontend application.",
   "author_name": "Your Name",
-  "author_email": "your@email.com"
+  "author_email": "your@email.com",
+
+
+  "_jinja2_env_vars": {
+    "block_start_string": "{[%",
+    "block_end_string": "%]}",
+    "variable_start_string": "{[",
+    "variable_end_string": "]}",
+    "comment_start_string": "{[#",
+    "comment_end_string": "#]}"
+  }
 }

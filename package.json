@@ -4,12 +4,12 @@
   "description": "Tool-set for Wulfpack monorepo",
   "main": "index.js",
   "scripts": {
-    "new": "cookiecutter templates/{{cookiecutter.project_slug}}",
+    "new": "cookiecutter template",
     "test": "echo \"No tool-set tests yet.\"",
     "lint": "npm run lint:frontend",
-    "lint:frontend": "echo 'Linting frontend template files...' && rm -rf template-lint-tmp && cp -r template template-lint-tmp && find template-lint-tmp -type f -name \"*.svelte\" -exec sed -i '' 's/{{[^{}]*}}/PLACEHOLDER/g' {} + && cd template-lint-tmp/{{cookiecutter.project_slug}}/frontend && npm install && npm run lint && cd ../../.. && rm -rf template-lint-tmp && echo 'Frontend template linting complete.'",
+    "lint:frontend": "echo 'Linting frontend template files...' && rm -rf template-lint-tmp && cp -r template template-lint-tmp && cd template-lint-tmp/{[cookiecutter.project_slug]}/frontend && npm install && npm run lint && cd ../../.. && rm -rf template-lint-tmp && echo 'Frontend template linting complete.'",
     "format": "npm run format:frontend",
-    "format:frontend": "npx prettier --write 'template/{{cookiecutter.project_slug}}/frontend/**/*.{js,ts,json,css,md,html}'"
+    "format:frontend": "npx prettier --write 'template/{[cookiecutter.project_slug]}/frontend/**/*.{js,ts,json,css,md,html}'"
   },
   "keywords": [],
   "author": "",

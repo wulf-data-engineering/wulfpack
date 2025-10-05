@@ -1,0 +1,4 @@
+# localstack and Cognito local files
+local/localstack-volume
+local/cognito-local-volume/db/clients.json
+local/cognito-local-volume/db/local_userPool.json
