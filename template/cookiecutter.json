@@ -13,5 +13,12 @@
     "variable_end_string": "]}",
     "comment_start_string": "{[#",
     "comment_end_string": "#]}"
-  }
+  },
+
+  "_copy_without_render": [
+    "**/node_modules/**",
+    "**/.idea/**",
+    "**/.git/**",
+    "**/build/**"
+  ]
 }

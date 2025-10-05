@@ -3,7 +3,7 @@
 This directory contains the frontend application using **SvelteKit** with **TypeScript**.
 It is designed to be a self-contained static single-page application.
 
-The application is rendered with **static-site generation (SSG)** via `@sveltejs/adapter-static`. 
+The application is rendered with **static-site generation (SSG)** via `@sveltejs/adapter-static`.
 
 **Node.js** with **npm** is used as runtime.
 
