@@ -1,4 +1,11 @@
-# Welcome to your CDK TypeScript project
+# Infrastructure
+
+The infrastructure is defined using **AWS CDK** in **TypeScript**.
+It deploys against **AWS**.
+For local development, it can also deploy against **localstack**.
+Cognito is not deployed automatically because **cognito-local** is used for local
+development.
+For local development all Lambda functions are forwarded to **cargo lambda watch**.
 
 ## Requirements
 
@@ -45,13 +52,16 @@ alias cdklocal="AWS_PROFILE=localstack AWS_PROFILE=localstack AWS_ENDPOINT_URL=\
 
 ## Deploy locally
 
-Start localstack
+Start localstack in one terminal on top level:
 
 ```bash
 docker compose up
 ```
 
+Deploy the infrastructure in another terminal in this directory:
+
 ```bash
+npm install
 cdklocal bootstrap # once
 cdklocal deploy
 ```

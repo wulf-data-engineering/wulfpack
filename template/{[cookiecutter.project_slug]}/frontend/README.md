@@ -13,6 +13,7 @@ The application is rendered with **static-site generation (SSG)** via `@sveltejs
 
 ## Developing
 
+- `npm install`: Installs the dependencies.
 - `npm run dev`: Starts the development server.
 
 ## Building
