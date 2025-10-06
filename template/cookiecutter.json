@@ -1,10 +1,45 @@
 {
-  "project_name": "Tool-Set Frontend",
+  "project_name": "Tool-Set Project",
   "project_slug": "{[ cookiecutter.project_name.lower().replace(' ', '-') ]}",
-  "project_description": "A Tool-Set frontend application.",
-  "author_name": "Your Name",
-  "author_email": "your@email.com",
+  "project_description": "A Tool-Set application.",
+  "author": "Wulf Data Engineering GmbH",
+  "author_email": "christoph@wulf.technology",
+  "license": [
+    "MIT",
+    "BSD-3-Clause",
+    "GPL-3.0-only",
+    "Apache-2.0",
+    "empty"
+  ],
+  "copyright_initial_year": "{[% now 'utc', '%Y' %]}",
+  "test_user_email": "test@wulf.technology",
+  "test_user_password": "Password123!",
 
+  "__prompts__": {
+    "project_name": "Select the name of your project",
+    "project_slug": "Select the slug for folder name and identifiers",
+    "project_description": "One line to give a brief idea of what the project does",
+    "author": "Your or your organization's name",
+    "author_email": "Your or your organization's email",
+    "license": {
+      "__prompt__": "Which license do you want to use?",
+      "MIT": "MIT License",
+      "BSD-3-Clause": "3-Clause BSD License",
+      "GPL-3.0-only": "GNU GPL v3.0",
+      "Apache-2.0": "Apache License, Version 2.0",
+      "empty": "Empty template just with copyright statement"
+    },
+    "copyright_initial_year": "Initial year for copyright statement",
+    "test_user_email": "Email for initial test user in development",
+    "test_user_password": "Initial password for the test user"
+  },
+
+  "_copy_without_render": [
+    "**/node_modules/**",
+    "**/.idea/**",
+    "**/.git/**",
+    "**/build/**"
+  ],
 
   "_jinja2_env_vars": {
     "block_start_string": "{[%",
@@ -13,12 +48,5 @@
     "variable_end_string": "]}",
     "comment_start_string": "{[#",
     "comment_end_string": "#]}"
-  },
-
-  "_copy_without_render": [
-    "**/node_modules/**",
-    "**/.idea/**",
-    "**/.git/**",
-    "**/build/**"
-  ]
+  }
 }

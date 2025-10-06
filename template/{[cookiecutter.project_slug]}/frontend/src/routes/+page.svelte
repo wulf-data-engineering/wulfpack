@@ -66,8 +66,8 @@
 	let mode: 'signIn' | 'signUp' = $state('signIn');
 	let message: [message: string, error: boolean] | null = $state(null);
 	let loading = $state(false);
-	let email = $state(dev ? 'test@wulf.technology' : '');
-	let password = $state(dev ? 'Password123!' : '');
+	let email = $state(dev ? '{[cookiecutter.test_user_email]}' : '');
+	let password = $state(dev ? '{[cookiecutter.test_user_password]}' : '');
 
 	function handleSubmit(e: SubmitEvent) {
 		e.preventDefault();
