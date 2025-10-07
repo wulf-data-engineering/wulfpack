@@ -1,17 +1,40 @@
 <script lang="ts">
-    let { data } = $props();
+    import {Button} from "$lib/components/ui/button";
+    import {signOut} from "$lib/auth";
+    import {goto} from "$app/navigation";
+    import * as Alert from "$lib/components/ui/alert";
+    import CheckCircle2Icon from "@lucide/svelte/icons/check-circle-2";
+
+    let {data} = $props();
     let currentUser = data.currentUser!;
+
+    async function authSignOut() {
+        await signOut();
+        await goto('/');
+    }
 </script>
 
 <svelte:head>
-	<title>Protected Page</title>
-	<meta name="description" content="Protected route" />
+    <title>Protected Page</title>
+    <meta name="description" content="Protected route"/>
 </svelte:head>
 
-<div>
-	<h1>Page for signed in users</h1>
-    <p>
-        You are signed in as {currentUser.signInDetails?.loginId}
-        <small>{currentUser.userId}</small>.
+<div class="m-auto max-w-5xl px-8 p-5">
+    <h1 class="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
+        Account
+    </h1>
+    <p class="text-muted-foreground text-xl leading-7 [&:not(:first-child)]:mt-6">
+        This is a page for signed in users.
     </p>
+
+    <div class="m-auto p-5 grid w-full max-w-xl items-start gap-4">
+        <Alert.Root>
+            <CheckCircle2Icon/>
+            <Alert.Title>You are signed in as {currentUser.signInDetails?.loginId}</Alert.Title>
+            <Alert.Description><small class="text-muted-foreground">{currentUser.userId}</small></Alert.Description>
+        </Alert.Root>
+
+        <Button variant="outline" onclick={authSignOut}>Sign Out</Button>
+    </div>
+
 </div>

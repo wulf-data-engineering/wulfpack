@@ -1,4 +1,4 @@
-# {[ cookiecutter.project_name ]} Frontend
+# Tool-Set Project Frontend
 
 This directory contains the frontend application using **SvelteKit** with **TypeScript**.
 It is designed to be a self-contained static single-page application.
@@ -11,10 +11,16 @@ The application is rendered with **static-site generation (SSG)** via `@sveltejs
 
 **Playwright** is used for end-to-end and UI testing in `e2e/`.
 
+**shadcn/svelte** is used for UI components and styling.
+
+**Storybook** is used for a UI component library.
+
 ## Developing
 
 - `npm install`: Installs the dependencies.
 - `npm run dev`: Starts the development server.
+- `npm run storybook`: Starts Storybook for UI component development.
+- `npx shadcn-svelte@latest add ...` adds new components from shadcn/svelte.
 
 ## Building
 
