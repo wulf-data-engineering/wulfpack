@@ -1,5 +1,6 @@
 import { writable, derived, get } from 'svelte/store';
 
+import { dev } from '$app/environment';
 import type { Amplify } from 'aws-amplify';
 import type { GetCurrentUserOutput } from 'aws-amplify/auth';
 import type * as AuthAPI from 'aws-amplify/auth';
@@ -20,10 +21,6 @@ export const isSignedIn = derived(currentUser, (u) => !!u);
 export const isSignedOut = derived(currentUser, (u) => u === null);
 export const isLoadingUser = derived(currentUser, (u) => u === undefined);
 
-const localUserPoolId: string = 'local_userPool';
-const localUserPoolClientId: string = 'local_userPoolClient';
-const localEndpoint: string = 'http://localhost:9229';
-
 let configured = false;
 
 /**
@@ -35,13 +32,11 @@ let configured = false;
 export async function configureAuth() {
 	if (configured) return;
 
-	const userPoolId: string = import.meta.env.VITE_USER_POOL_ID || localUserPoolId;
+	const userPoolId: string = import.meta.env.VITE_USER_POOL_ID || (dev && 'local_userPool');
 	const userPoolClientId: string =
-		import.meta.env.VITE_USER_POOL_CLIENT_ID || localUserPoolClientId;
+		import.meta.env.VITE_USER_POOL_CLIENT_ID || (dev && 'local_userPoolClient');
 	const endpoint: string | undefined =
-		import.meta.env.VITE_COGNITO_ENDPOINT || userPoolId === localUserPoolId
-			? localEndpoint
-			: undefined;
+		import.meta.env.VITE_COGNITO_ENDPOINT || (dev && 'http://localhost:9229');
 
 	const amplifyApi: Amplify = (await import('aws-amplify')).Amplify;
 	const authApi: Auth = await import('aws-amplify/auth');
@@ -76,48 +71,60 @@ export async function loadCurrentUser() {
 	}
 }
 
+async function performAutoSignIn() {
+	await get(auth).autoSignIn();
+	await loadCurrentUser();
+}
+
 /**
  * Signs up the user with given credentials.
  * If there is a current user, they are signed out first.
- * If sign up is completed, the user is also signed in.
+ * If confirmation completes immediately with auto sign in, the user is also signed in.
  */
-export async function signUp(email: string, password: string) {
-	if (get(currentUser)) await signOut();
+export async function signUp(email: string, password: string, autoSignIn: boolean = true) {
+	if (get(isSignedIn)) await signOut();
 
-	const user = await get(auth).signUp({
+	const result = await get(auth).signUp({
 		username: email,
 		password: password,
 		options: {
 			userAttributes: {
 				email: email
-			}
+			},
+			autoSignIn
 		}
 	});
-	if (!user.isSignUpComplete) {
-		console.warn('User is not completely signed up in after signUp:', user.nextStep);
-	} else {
-		await signIn(email, password);
+	if (!result.isSignUpComplete) {
+		console.log('User is not completely signed up in after signUp:', result.nextStep);
+	} else if (result.nextStep.signUpStep === 'COMPLETE_AUTO_SIGN_IN') {
+		if (dev) {
+			// auto sign in not supported in Cognito local
+			await signIn(email, password);
+		} else {
+			await performAutoSignIn();
+		}
 	}
-	return user;
+	return result;
 }
 
 /**
  * Confirms user sign up with given OTP code.
- * If sign up is completed, the user is also signed in.
+ * If confirmation completes with auto signs in in production, the user is also signed in.
  */
-export async function confirmSignUp(email: string, password: string, otp: string) {
-	if (get(currentUser)) await signOut();
-
-	const user = await get(auth).confirmSignUp({
+export async function confirmSignUp(email: string, otp: string) {
+	const result = await get(auth).confirmSignUp({
 		username: email,
 		confirmationCode: otp
 	});
-	if (!user.isSignUpComplete) {
-		console.warn('User is not completely signed up in after confirm:', user.nextStep);
-	} else {
-		await signIn(email, password);
+	console.log(result.nextStep.signUpStep);
+	if (!result.isSignUpComplete) {
+		console.warn('User is not completely signed up in after confirm:', result.nextStep);
+	} else if (result.nextStep.signUpStep === 'COMPLETE_AUTO_SIGN_IN') {
+		if (!dev /* not supported in Cognito local */) {
+			await performAutoSignIn();
+		}
 	}
-	return user;
+	return result;
 }
 
 /**
@@ -133,23 +140,6 @@ export async function signIn(username: string, password: string) {
 	});
 	if (!user.isSignedIn) {
 		console.warn('User is not signed in after signIn:', user.nextStep);
-	} else {
-		await loadCurrentUser();
-	}
-	return user;
-}
-
-/**
- * Confirms user sign in with given OTP code.
- */
-export async function confirmSignIn(otp: string) {
-	if (get(currentUser)) await signOut();
-
-	const user = await get(auth).confirmSignIn({
-		challengeResponse: otp
-	});
-	if (!user.isSignedIn) {
-		console.warn('User is not completely signed in in after confirm:', user.nextStep);
 	} else {
 		await loadCurrentUser();
 	}

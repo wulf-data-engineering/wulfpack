@@ -1,0 +1,146 @@
+<script lang="ts">
+    import {dev} from '$app/environment';
+    import * as auth from '$lib/auth';
+    import {currentUser} from '$lib/auth';
+    import {page} from "$app/state";
+    import {goto} from "$app/navigation";
+    import {Button} from "$lib/components/ui/button";
+    import {Label} from "$lib/components/ui/label";
+    import {Input} from "$lib/components/ui/input";
+    import * as Card from "$lib/components/ui/card";
+    import {toastError, toastSuccess} from "./toasts";
+    import {onMount} from "svelte";
+
+    // TODO: Verify password configuration
+    // TODO: Password forgotten page
+    // TODO: Enter new password page
+    // TODO: Auto reset in case of PasswordResetRequiredException
+    // TODO: Change password page?
+
+    async function signOut() {
+        try {
+            loading = true;
+            await auth.signOut();
+            toastSuccess('Signed Out', 'Successfully signed out.');
+        } catch (err) {
+            console.error('Error signing out:', err);
+            toastError('Sign Out Failed', 'Could not sign out.');
+        } finally {
+            loading = false;
+        }
+    }
+
+    let email = $state('');
+    let password = $state('');
+
+    let autofocusPassword = $state(false);
+
+    onMount(async () => {
+        let maybeEmail = page.url.searchParams.get("email")
+        if (maybeEmail) {
+            email = maybeEmail;
+            autofocusPassword = true;
+        } else if (dev) {
+            // erased at build time
+            email = '{[cookiecutter.test_user_email]}';
+            password = '{[cookiecutter.test_user_password]}';
+        }
+    });
+
+    let loading = $state(false);
+
+    async function handleSubmit(e: Event) {
+        e.preventDefault();
+        loading = true;
+        try {
+            const result = await auth.signIn(email, password);
+            console.log('Sign in:', result);
+            if (result.isSignedIn) {
+                // Redirect to the originally requested page
+                const redirectTo = page.url.searchParams.get('redirectTo');
+                if (redirectTo)
+                    await goto(redirectTo);
+                else
+                    toastSuccess('Signed In', 'Successfully signed in.');
+            } else if (result.nextStep.signInStep === 'CONFIRM_SIGN_UP') {
+                toastSuccess('Next Step', 'Please complete the sign-up process.');
+                await goto(`/confirmSignUp?email=${encodeURIComponent(email)}`);
+            } else if (result.nextStep.signInStep === 'RESET_PASSWORD')
+                toastError('Sign In Failed', 'Password reset is required. Password reset is not implemented.');
+            else
+                toastError('Next Step', `${result.nextStep.signInStep} is not implemented.`);
+        } catch (err) {
+            console.error('Error signing in:', err);
+            if (err instanceof Error && (err.name === 'NotAuthorizedException' || err.name === 'UserNotFoundException' || err.name === 'InvalidPasswordException'))
+                toastError('Sign In Failed', 'Incorrect email or password.');
+            else if (err instanceof Error && err.name === 'PasswordResetRequiredException')
+                toastError('Sign In Failed', 'Password reset is required. Password reset is not implemented.');
+            else
+                toastError('Sign In Failed', 'An error occurred during sign in.');
+        } finally {
+            loading = false;
+        }
+    }
+</script>
+
+<Card.Root class="w-full max-w-sm m-auto mt-5">
+
+    {#if $currentUser}
+
+        <Card.Header>
+            <Card.Title>Signed In</Card.Title>
+            <Card.Description>You are signed in</Card.Description>
+            <Card.Action>
+                <Button variant="link" href="/account">Your account</Button>
+            </Card.Action>
+        </Card.Header>
+
+        <Card.Content>
+            <p>
+                You are signed in as {$currentUser.signInDetails?.loginId}. <br/>
+                <small class="text-muted-foreground">{$currentUser.userId}</small>
+            </p>
+        </Card.Content>
+
+        <Card.Footer class="flex-col gap-2">
+            <Button onclick={signOut} disabled={loading} variant="outline" class="w-full">Sign Out</Button>
+        </Card.Footer>
+
+    {:else if $currentUser === null}
+
+        <Card.Header>
+            <Card.Title>Sign In</Card.Title>
+            <Card.Description>Sign in to your account</Card.Description>
+        </Card.Header>
+
+        <Card.Content>
+            <form onsubmit={handleSubmit}>
+                <div class="flex flex-col gap-6">
+                    <div class="grid gap-2">
+                        <Label for="email">Email</Label>
+                        <Input id="email" type="email" autofocus={!autofocusPassword} bind:value={email} required/>
+                    </div>
+                    <div class="grid gap-2">
+                        <div class="flex items-center">
+                            <Label for="password">Password</Label>
+                        </div>
+                        <Input id="password" type="password" autofocus={autofocusPassword} bind:value={password}
+                               required/>
+                    </div>
+                </div>
+            </form>
+        </Card.Content>
+
+        <Card.Footer class="flex-col gap-2">
+            <Button disabled={loading} class="w-full" onclick={handleSubmit}>Sign In</Button>
+            <p>
+                Don’t have an account?
+                <a href="/signUp">Sign up</a>
+            </p>
+        </Card.Footer>
+    {:else}
+        <Card.Content>
+            <p>Loading…</p>
+        </Card.Content>
+    {/if}
+</Card.Root>
