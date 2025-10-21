@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 test('sign up', async ({ page }) => {
 	// Given: the home page with sign in box
 
-	const newEmail = 'test@wulf.technology'.replace('@', `+e2e-${new Date().getTime()}-confirm@`); // TODO: %[ test_user_email ]% ...
+	const newEmail = '%[ cookiecutter.test_user_email ]%'.replace('@', `+e2e-${new Date().getTime()}-confirm@`);
 
 	await page.goto('/');
 	await expect(page.locator('h1')).toBeVisible();
@@ -74,7 +74,7 @@ test('sign up', async ({ page }) => {
 
 	// When: submitting with valid password but wrong repetition
 
-	await password.fill('%[ test_user_password ]%');
+	await password.fill('%[ cookiecutter.test_user_password ]%');
 	await submit.click();
 
 	// Then: password is marked as invalid and shows a validation text
@@ -85,7 +85,7 @@ test('sign up', async ({ page }) => {
 
 	// When: submitting with valid data
 
-	await confirm.fill('%[ test_user_password ]%');
+	await confirm.fill('%[ cookiecutter.test_user_password ]%');
 	await submit.click();
 
 	// Then: switches to confirm page
@@ -120,7 +120,7 @@ test('sign up', async ({ page }) => {
 	async function signedOutFlow() {
 		await expect(signIn).toBeVisible();
 		await password.fill(newEmail);
-		await password.fill('%[ test_user_password ]%');
+		await password.fill('%[ cookiecutter.test_user_password ]%');
 		await signIn.click();
 		await signedInFlow();
 	}

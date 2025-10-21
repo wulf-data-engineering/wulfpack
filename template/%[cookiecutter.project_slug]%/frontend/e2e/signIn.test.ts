@@ -43,8 +43,8 @@ test('sign in', async ({ page }) => {
 
 	// When: submitting with incorrect credentials
 
-	await email.fill('%[ test_user_email ]%');
-	await password.fill('%[ test_user_password ]%-wrong');
+	await email.fill('%[ cookiecutter.test_user_email ]%');
+	await password.fill('%[ cookiecutter.test_user_password ]%-wrong');
 	await submit.click();
 
 	// Then: an error toast shows up informing about the failed sign in
@@ -54,9 +54,9 @@ test('sign in', async ({ page }) => {
 	// When: submitting with correct credentials
 
 	await email.clear();
-	await email.fill('%[ test_user_email ]%');
+	await email.fill('%[ cookiecutter.test_user_email ]%');
 	await password.clear();
-	await password.fill('%[ test_user_password ]%');
+	await password.fill('%[ cookiecutter.test_user_password ]%');
 	await submit.click();
 
 	// Then: switches to signed in mode

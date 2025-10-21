@@ -49,7 +49,7 @@ test('password forgotten', async ({ page }) => {
 
 	// When: submitting with valid Email address
 
-	await email.fill('%[ test_user_email ]%');
+	await email.fill('%[ cookiecutter.test_user_email ]%');
 	await submit.click();
 
 	// Then: switch to the form to confirm password reset
@@ -61,7 +61,7 @@ test('password forgotten', async ({ page }) => {
 	await expect(resetPassword).toBeVisible();
 	await expect(resendCode).toBeVisible();
 
-	await expect(email).toHaveValue('%[ test_user_email ]%');
+	await expect(email).toHaveValue('%[ cookiecutter.test_user_email ]%');
 
 	// When: submitting without new password
 
@@ -76,7 +76,7 @@ test('password forgotten', async ({ page }) => {
 
 	// When: submitting with valid password but without repetition
 
-	await password.fill('%[ test_user_password ]%');
+	await password.fill('%[ cookiecutter.test_user_password ]%');
 	await submit.click();
 
 	// Then: password is marked as invalid and shows a validation text
@@ -87,7 +87,7 @@ test('password forgotten', async ({ page }) => {
 
 	// When: submitting with valid data
 
-	await confirm.fill('%[ test_user_password ]%');
+	await confirm.fill('%[ cookiecutter.test_user_password ]%');
 	await submit.click();
 
 	// Then: switches back to home in signed in mode
