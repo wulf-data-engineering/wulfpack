@@ -44,7 +44,7 @@ export function checkNewPassword(value: string, policy: PasswordPolicy) {
  * Validates presence of new password and match of an optional Cognito policy.
  * Returns error messages if invalid for `ValidatedInput` component.
  */
-export function validateNewPassword(policy: PasswordPolicy | null, value: string) {
+export function validateNewPassword(value: string, policy: PasswordPolicy | null) {
 	if (value === '') {
 		return 'Password is required.';
 	}

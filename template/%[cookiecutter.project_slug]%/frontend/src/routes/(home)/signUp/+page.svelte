@@ -78,7 +78,7 @@
                         label="Password"
                         type="password"
                         bind:value={password}
-                        validations={[(v) => validateNewPassword(passwordPolicy, v)]}/>
+                        validations={[(v) => validateNewPassword(v, passwordPolicy)]}/>
 
                 <ValidatedInput
                         id="confirm"

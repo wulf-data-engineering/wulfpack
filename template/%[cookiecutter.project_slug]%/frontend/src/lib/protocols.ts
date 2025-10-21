@@ -1,5 +1,5 @@
-import { BinaryWriter } from '@bufbuild/protobuf/wire';
-import { uncompress, compress } from 'snappyjs';
+import { compress, uncompress } from 'snappyjs';
+import type { BinaryWriter } from '@bufbuild/protobuf/wire';
 
 // The protocol fetch methods use this type to describe the encode/decode functions for a message type.
 type ProtoType<T> = {
@@ -36,7 +36,7 @@ export async function protocolRequest<Req, Res>(
 	requestMessage: Req,
 	requestProto: ProtoType<Req>,
 	responseProto: ProtoType<Res>,
-	options: Options
+	options: Options = {}
 ): Promise<Res> {
 	return (await protocolImpl(url, requestMessage, requestProto, responseProto, options)) as Res;
 }
@@ -100,9 +100,11 @@ async function protocolImpl<Req = undefined, Res = undefined>(
 			body = JSON.stringify(requestProto.toJSON!(requestMessage));
 		} else {
 			const binary = requestProto.encode!(requestMessage).finish();
-			if (binary.length > compressionThreshold) {
+			if (binary.byteLength > compressionThreshold) {
 				body = compress(binary);
 				compressed = true;
+			} else {
+				body = binary;
 			}
 		}
 	}
@@ -116,10 +118,11 @@ async function protocolImpl<Req = undefined, Res = undefined>(
 	init.headers = {
 		...init.headers,
 		...(body ? { 'content-type': contentType } : {}),
-		...(compressed ? { 'content-encoding': 'snappy' } : {}),
-		accept: contentType,
-		'x-accept-encoding': 'snappy'
+		...(asJson ? { accept: contentType } : {}),
+		...(compressed ? { 'content-encoding': 'snappy' } : {})
 	};
+
+	init.body = body;
 
 	const res = await fetch(url, init);
 
@@ -132,7 +135,6 @@ async function protocolImpl<Req = undefined, Res = undefined>(
 			let bytes = await res.bytes();
 			const resContentEncoding = res.headers.get('content-encoding') ?? '';
 			if (resContentEncoding === 'snappy') {
-				console.log('Decompressing snappy response of size', bytes.length);
 				bytes = uncompress(bytes);
 			}
 			return responseProto.decode!(bytes);
