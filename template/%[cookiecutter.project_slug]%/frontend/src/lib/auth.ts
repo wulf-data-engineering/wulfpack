@@ -116,7 +116,6 @@ export async function confirmSignUp(email: string, otp: string) {
 		username: email,
 		confirmationCode: otp
 	});
-	console.log(result.nextStep.signUpStep);
 	if (!result.isSignUpComplete) {
 		console.warn('User is not completely signed up in after confirm:', result.nextStep);
 	} else if (result.nextStep.signUpStep === 'COMPLETE_AUTO_SIGN_IN') {
