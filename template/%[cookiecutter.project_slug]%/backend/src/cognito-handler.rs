@@ -34,6 +34,7 @@ async fn function_handler(
 }
 
 #[cfg(not(debug_assertions))]
+#[inline(always)]
 fn auto_confirm(_: &CognitoEventUserPoolsPreSignupRequest) -> bool {
     false
 }
@@ -52,4 +53,66 @@ fn auto_confirm(request: &CognitoEventUserPoolsPreSignupRequest) -> bool {
 async fn main() -> Result<(), Error> {
     tracing_subscriber::fmt::init();
     run(service_fn(function_handler)).await
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use aws_lambda_events::cognito::CognitoEventUserPoolsPreSignup;
+    use lambda_runtime::Context;
+    use std::collections::HashMap;
+
+    #[tokio::test]
+    async fn auto_confirms_test_user() {
+        let pre_sign_up = CognitoEventUserPoolsPreSignup {
+            cognito_event_user_pools_header: Default::default(),
+            request: CognitoEventUserPoolsPreSignupRequest {
+                user_attributes: HashMap::from([(
+                    "email".to_string(),
+                    "test@tester.de".to_string(),
+                )]),
+                validation_data: Default::default(),
+                client_metadata: Default::default(),
+            },
+            response: Default::default(),
+        };
+        let event = LambdaEvent::new(
+            CognitoUserPoolEvent::PreSignup(pre_sign_up),
+            Context::default(),
+        );
+        let result = function_handler(event).await.unwrap();
+        match result {
+            CognitoUserPoolEvent::PreSignup(pre_sign_up) => {
+                assert_eq!(pre_sign_up.response.auto_confirm_user, true);
+            }
+            _ => panic!("wrong result"),
+        }
+    }
+
+    #[tokio::test]
+    async fn not_confirms_test_user_with_confirm() {
+        let pre_sign_up = CognitoEventUserPoolsPreSignup {
+            cognito_event_user_pools_header: Default::default(),
+            request: CognitoEventUserPoolsPreSignupRequest {
+                user_attributes: HashMap::from([(
+                    "email".to_string(),
+                    "test+confirm@tester.de".to_string(),
+                )]),
+                validation_data: Default::default(),
+                client_metadata: Default::default(),
+            },
+            response: Default::default(),
+        };
+        let event = LambdaEvent::new(
+            CognitoUserPoolEvent::PreSignup(pre_sign_up),
+            Context::default(),
+        );
+        let result = function_handler(event).await.unwrap();
+        match result {
+            CognitoUserPoolEvent::PreSignup(pre_sign_up) => {
+                assert_eq!(pre_sign_up.response.auto_confirm_user, false);
+            }
+            _ => panic!("wrong result"),
+        }
+    }
 }

@@ -1,10 +1,10 @@
 use anyhow::{anyhow, Context, Result};
 use aws_sdk_cognitoidentityprovider as cognito_idp;
-use backend::{write_response, load_aws_cognito_config};
+use backend::{load_aws_cognito_config, write_response};
 use lambda_http::{run, service_fn, tracing, Body, Error, Request, Response};
 use protocol_macro::protocols;
 
-#[protocols("%[cookiecutter.package_name]%")]
+#[protocols("tool_set_project")]
 pub mod protocols {}
 
 #[derive(Clone)]
@@ -87,4 +87,96 @@ fn default_user_pool_id() -> Option<String> {
 #[cfg(not(debug_assertions))]
 fn default_user_pool_id() -> Option<String> {
     None
+}
+
+#[cfg(test)]
+mod tests {
+    use wiremock::matchers::header;
+    use super::*;
+
+    #[tokio::test]
+    async fn retrieve_password_policy() {
+        use wiremock::matchers::{method, path};
+        use wiremock::{Mock, MockServer, ResponseTemplate};
+        let server = MockServer::start().await;
+
+        Mock::given(method("POST"))
+            .and(path("/"))
+            .and(header("x-amz-target", "AWSCognitoIdentityProviderService.DescribeUserPool"))
+            .respond_with(ResponseTemplate::new(200).set_body_raw(
+                r#"{
+                    "UserPool": {
+                        "Id": "test-pool",
+                        "Name": "TestPool",
+                        "Policies": {
+                            "PasswordPolicy": {
+                                "MinimumLength": 9,
+                                "RequireUppercase": false,
+                                "RequireLowercase": true,
+                                "RequireNumbers": false,
+                                "RequireSymbols": true,
+                                "TemporaryPasswordValidityDays": 7
+                            }
+                        }
+                    }
+                }"#,
+                "application/json",
+            ))
+            .mount(&server)
+            .await;
+
+        let shared_config = backend::load_aws_config_for_mock(&server).await;
+        let client = aws_sdk_cognitoidentityprovider::Client::new(&shared_config);
+        let app_state = AppState {
+            client,
+            user_pool_id: "test-pool".to_string(),
+        };
+
+        let result = get_password_policy(&app_state).await.unwrap();
+        assert_eq!(result.minimum_length, 9);
+        assert_eq!(result.require_uppercase, false);
+        assert_eq!(result.require_lowercase, true);
+        assert_eq!(result.require_numbers, false);
+        assert_eq!(result.require_symbols, true);
+    }
+
+    #[tokio::test]
+    async fn retrieve_empty_password_policy() {
+        use wiremock::matchers::{method, path, header};
+        use wiremock::{Mock, MockServer, ResponseTemplate};
+        let server = MockServer::start().await;
+
+        Mock::given(method("POST"))
+            .and(path("/"))
+            .and(header("x-amz-target", "AWSCognitoIdentityProviderService.DescribeUserPool"))
+            .respond_with(ResponseTemplate::new(200).set_body_raw(
+                r#"{
+                    "UserPool": {
+                        "Id": "test-pool",
+                        "Name": "TestPool",
+                        "Policies": {
+                            "PasswordPolicy": {
+                            }
+                        }
+                    }
+                }"#,
+                "application/json",
+            ))
+            .mount(&server)
+            .await;
+
+        let shared_config = backend::load_aws_config_for_mock(&server).await;
+        let client = aws_sdk_cognitoidentityprovider::Client::new(&shared_config);
+        let app_state = AppState {
+            client,
+            user_pool_id: "test-pool".to_string(),
+        };
+
+        let result = get_password_policy(&app_state).await.unwrap();
+        assert_eq!(result.minimum_length, 6);
+        assert_eq!(result.require_uppercase, false);
+        assert_eq!(result.require_lowercase, false);
+        assert_eq!(result.require_numbers, false);
+        assert_eq!(result.require_symbols, false);
+    }
 }

@@ -1,29 +1,29 @@
 use aws_config::{BehaviorVersion, SdkConfig};
 use aws_sdk_cognitoidentityprovider::config::{Credentials, ProvideCredentials};
 
-// LocalStack endpoint for local development and testing
-#[cfg(debug_assertions)]
+// LocalStack endpoint for local development and integration testing
+#[cfg(any(debug_assertions, test))]
 fn default_endpoint() -> Option<String> {
     Some("http://localhost:4566".into())
 }
 
-#[cfg(not(debug_assertions))]
+#[cfg(not(any(debug_assertions, test)))]
 fn default_endpoint() -> Option<String> {
     None
 }
 
-// cognito-local endpoint for local development and testing
-#[cfg(debug_assertions)]
+// cognito-local endpoint for local development and integration testing
+#[cfg(any(debug_assertions, test))]
 fn default_cognito_endpoint() -> Option<String> {
     Some("http://localhost:9229".into())
 }
 
-#[cfg(not(debug_assertions))]
+#[cfg(not(any(debug_assertions, test)))]
 fn default_cognito_endpoint() -> Option<String> {
     None
 }
 
-#[cfg(debug_assertions)]
+#[cfg(any(debug_assertions, test))]
 fn default_credentials_provider() -> Option<impl ProvideCredentials> {
     Some(
         Credentials::builder()
@@ -34,7 +34,7 @@ fn default_credentials_provider() -> Option<impl ProvideCredentials> {
     )
 }
 
-#[cfg(not(debug_assertions))]
+#[cfg(not(any(debug_assertions, test)))]
 fn default_credentials_provider() -> Option<impl ProvideCredentials> {
     None
 }
@@ -70,3 +70,27 @@ async fn load_aws_config_for_endpoint(endpoint: Option<String>) -> SdkConfig {
 
     loader.load().await
 }
+
+///
+/// Unit test can use this loader to get default credentials and using given mock server.
+///
+/// ```
+/// use wiremock::matchers::{method, path, header};
+/// use wiremock::{MockServer, Mock, ResponseTemplate};
+/// use cognito_idp::Client;
+///
+/// // 1) Start mock server
+/// let server = MockServer::start().await;
+/// // ... define required routes
+///
+/// // 2) Create client
+/// let shared_cfg = load_aws_config_for_mock(server).await;
+/// let client = cognito_idp::Client::new(&shared_cfg);
+/// // ... test your component that uses the client
+/// ```
+///
+#[cfg(any(debug_assertions, test))]
+pub async fn load_aws_config_for_mock(mock_server: &wiremock::MockServer) -> SdkConfig {
+    load_aws_config_for_endpoint(Some(mock_server.uri())).await
+}
+
