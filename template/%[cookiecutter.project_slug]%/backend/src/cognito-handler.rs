@@ -1,7 +1,6 @@
 use aws_lambda_events::cognito::CognitoEventUserPoolsPreSignupRequest;
 use backend::CognitoUserPoolEvent;
 use lambda_runtime::{run, service_fn, Error, LambdaEvent};
-use tracing_subscriber;
 
 ///
 /// This lambda reacts on Cognito's lifecycle events.

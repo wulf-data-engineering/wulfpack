@@ -1,0 +1,58 @@
+version: 2
+updates:
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+
+  # Backend
+  - package-ecosystem: "cargo"
+    directory: "backend/"
+    schedule:
+      interval: "weekly"
+      day: "thursday"
+      time: "09:00"
+      timezone: "Europe/Berlin"
+    groups:
+      dependencies:
+        update-types:
+          - "minor"
+          - "patch"
+
+  # Frontend
+  - package-ecosystem: "npm"
+    directory: "frontend/"
+    schedule:
+      interval: "weekly"
+      day: "thursday"
+      time: "09:05"
+      timezone: "Europe/Berlin"
+    groups:
+      dependencies:
+        update-types:
+          - "minor"
+          - "patch"
+
+  # Infrastructure
+  - package-ecosystem: "npm"
+    directory: "infrastructure/"
+    schedule:
+      interval: "weekly"
+      day: "thursday"
+      time: "09:10"
+      timezone: "Europe/Berlin"
+    groups:
+      dependencies:
+        update-types:
+          - "minor"
+          - "patch"
+
+  # Docker Compose
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "thursday"
+      time: "09:15"
+      timezone: "Europe/Berlin"

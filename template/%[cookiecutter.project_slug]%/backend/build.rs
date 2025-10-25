@@ -81,10 +81,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let pkg = file.package.unwrap_or_default();
         collect_messages(&pkg, "", &file.message_type, &mut all_message_names);
     }
-    
+
     // Configure prost-build
     let mut config = prost_build::Config::new();
-    let derive_attr = r#"#[derive(serde::Serialize, serde::Deserialize)] #[serde(rename_all = "camelCase")]"#;
+    let derive_attr =
+        r#"#[derive(serde::Serialize, serde::Deserialize)] #[serde(rename_all = "camelCase")]"#;
     for full_name in &all_message_names {
         config.type_attribute(full_name, derive_attr);
     }

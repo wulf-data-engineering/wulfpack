@@ -135,7 +135,7 @@ fn decode_snappy(buf: &[u8]) -> Result<Vec<u8>, Error> {
         .map_err(|e| lambda_http::Error::from(format!("Snappy decompression error: {}", e)))
 }
 
-fn encode_snappy(buf: &mut Vec<u8>) -> Result<Vec<u8>, Error> {
+fn encode_snappy(buf: &mut [u8]) -> Result<Vec<u8>, Error> {
     let mut encoder = Encoder::new();
     encoder
         .compress_vec(buf)

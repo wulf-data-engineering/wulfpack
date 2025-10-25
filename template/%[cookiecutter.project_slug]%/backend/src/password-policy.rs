@@ -1,15 +1,15 @@
-use anyhow::{anyhow, Context, Result};
-use aws_sdk_cognitoidentityprovider as cognito_idp;
+use anyhow::{anyhow, Result};
+use aws_sdk_cognitoidentityprovider::Client;
 use backend::{load_aws_cognito_config, write_response};
 use lambda_http::{run, service_fn, tracing, Body, Error, Request, Response};
 use protocol_macro::protocols;
 
-#[protocols("tool_set_project")]
+#[protocols("%[cookiecutter.package_name]%")]
 pub mod protocols {}
 
 #[derive(Clone)]
 struct AppState {
-    client: cognito_idp::Client,
+    client: Client,
     user_pool_id: String,
 }
 
@@ -24,7 +24,7 @@ async fn main() -> Result<(), Error> {
 
     let shared_cfg = load_aws_cognito_config().await;
 
-    let client = cognito_idp::Client::new(&shared_cfg);
+    let client = Client::new(&shared_cfg);
 
     let user_pool_id = std::env::var("USER_POOL_ID")
         .ok()
@@ -55,8 +55,7 @@ async fn get_password_policy(state: &AppState) -> Result<PasswordPolicy> {
         .describe_user_pool()
         .user_pool_id(&state.user_pool_id)
         .send()
-        .await
-        .context("failed to call DescribeUserPool")?;
+        .await?;
 
     let up = resp
         .user_pool()
@@ -91,8 +90,8 @@ fn default_user_pool_id() -> Option<String> {
 
 #[cfg(test)]
 mod tests {
-    use wiremock::matchers::header;
     use super::*;
+    use wiremock::matchers::header;
 
     #[tokio::test]
     async fn retrieve_password_policy() {
@@ -102,7 +101,10 @@ mod tests {
 
         Mock::given(method("POST"))
             .and(path("/"))
-            .and(header("x-amz-target", "AWSCognitoIdentityProviderService.DescribeUserPool"))
+            .and(header(
+                "x-amz-target",
+                "AWSCognitoIdentityProviderService.DescribeUserPool",
+            ))
             .respond_with(ResponseTemplate::new(200).set_body_raw(
                 r#"{
                     "UserPool": {
@@ -142,13 +144,16 @@ mod tests {
 
     #[tokio::test]
     async fn retrieve_empty_password_policy() {
-        use wiremock::matchers::{method, path, header};
+        use wiremock::matchers::{header, method, path};
         use wiremock::{Mock, MockServer, ResponseTemplate};
         let server = MockServer::start().await;
 
         Mock::given(method("POST"))
             .and(path("/"))
-            .and(header("x-amz-target", "AWSCognitoIdentityProviderService.DescribeUserPool"))
+            .and(header(
+                "x-amz-target",
+                "AWSCognitoIdentityProviderService.DescribeUserPool",
+            ))
             .respond_with(ResponseTemplate::new(200).set_body_raw(
                 r#"{
                     "UserPool": {

@@ -1,5 +1,7 @@
-use aws_config::{BehaviorVersion, SdkConfig};
-use aws_sdk_cognitoidentityprovider::config::{Credentials, ProvideCredentials};
+use aws_config::{BehaviorVersion, Region, SdkConfig};
+use aws_credential_types::{provider::ProvideCredentials, Credentials};
+
+const DEFAULT_REGION: &str = "eu-central-1";
 
 // LocalStack endpoint for local development and integration testing
 #[cfg(any(debug_assertions, test))]
@@ -67,7 +69,9 @@ async fn load_aws_config_for_endpoint(endpoint: Option<String>) -> SdkConfig {
     if let Some(credentials_provider) = default_credentials_provider() {
         loader = loader.credentials_provider(credentials_provider);
     }
+    let region_name = std::env::var("AWS_REGION").unwrap_or(DEFAULT_REGION.to_string());
 
+    loader = loader.region(Region::new(region_name));
     loader.load().await
 }
 
@@ -77,20 +81,23 @@ async fn load_aws_config_for_endpoint(endpoint: Option<String>) -> SdkConfig {
 /// ```
 /// use wiremock::matchers::{method, path, header};
 /// use wiremock::{MockServer, Mock, ResponseTemplate};
-/// use cognito_idp::Client;
+/// use aws_sdk_cognitoidentityprovider::Client;
 ///
-/// // 1) Start mock server
-/// let server = MockServer::start().await;
-/// // ... define required routes
 ///
-/// // 2) Create client
-/// let shared_cfg = load_aws_config_for_mock(server).await;
-/// let client = cognito_idp::Client::new(&shared_cfg);
-/// // ... test your component that uses the client
+/// #[tokio::test]
+/// async fn some_test() {
+///     // 1) Start mock server
+///     let server = MockServer::start().await;
+///     // define required routes
+///
+///     // 2) Create client
+///     let shared_cfg = load_aws_config_for_mock(server).await;
+///     let client = cognito_idp::Client::new(&shared_cfg);
+///     // test your component that uses the client
+/// }
 /// ```
 ///
 #[cfg(any(debug_assertions, test))]
 pub async fn load_aws_config_for_mock(mock_server: &wiremock::MockServer) -> SdkConfig {
     load_aws_config_for_endpoint(Some(mock_server.uri())).await
 }
-

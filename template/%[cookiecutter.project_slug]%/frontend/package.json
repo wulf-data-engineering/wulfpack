@@ -1,5 +1,5 @@
 {
-	"name": "tool-set-project-frontend",
+	"name": "%[cookiecutter.project_slug]%-frontend",
 	"version": "0.0.1",
 	"private": true,
 	"type": "module",

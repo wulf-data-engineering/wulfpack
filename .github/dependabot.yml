@@ -1,0 +1,73 @@
+version: 2
+updates:
+  # Own GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+
+  # Own npm
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "daily"
+      time: "09:00"
+      timezone: "Europe/Berlin"
+    groups:
+      dependencies:
+        update-types:
+          - "minor"
+          - "patch"
+
+  # Template's GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "template/%[cookiecutter.project_slug]%/"
+    schedule:
+      interval: "monthly"
+
+  # Template's Backend
+  - package-ecosystem: "cargo"
+    directory: "template/%[cookiecutter.project_slug]%/backend/"
+    schedule:
+      interval: "daily"
+      time: "09:00"
+      timezone: "Europe/Berlin"
+    groups:
+      dependencies:
+        update-types:
+          - "minor"
+          - "patch"
+
+  # Template's Frontend
+  - package-ecosystem: "npm"
+    directory: "template/%[cookiecutter.project_slug]%/frontend/"
+    schedule:
+      interval: "daily"
+      time: "09:05"
+      timezone: "Europe/Berlin"
+    groups:
+      dependencies:
+        update-types:
+          - "minor"
+          - "patch"
+
+  # Template's Infrastructure
+  - package-ecosystem: "npm"
+    directory: "template/%[cookiecutter.project_slug]%/infrastructure/"
+    schedule:
+      interval: "daily"
+      time: "09:10"
+      timezone: "Europe/Berlin"
+    groups:
+      dependencies:
+        update-types:
+          - "minor"
+          - "patch"
+
+  # Template's Docker Compose
+  - package-ecosystem: "docker"
+    directory: "template/%[cookiecutter.project_slug]%/"
+    schedule:
+      interval: "daily"
+      time: "09:15"
+      timezone: "Europe/Berlin"
