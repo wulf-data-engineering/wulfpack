@@ -23,9 +23,21 @@ jobs:
       - name: Install cookiecutter
         run: pip install cookiecutter
       - name: Generate template instance
-        id: generate
         run: |
-          cookiecutter template/ --no-input --no-input project_name="Template-Instance" --output-dir .
+          # Overwrite defaults to make sure defaults are not part of the seeded template due to copy & paste
+          cookiecutter --no-input --output-dir . template/ \
+            project_name="Template Instance" \
+            project_description="Some sample application." \
+            author="GitHub Actions" \
+            author_email="git@hub.actions" \
+            test_user_email="test@hub.actions" \
+            test_user_password="Test456$"
+      - name: Verify template contains no default values
+        run: |
+          python scripts/check_defaults.py --template template/cookiecutter.json --generated template-instance \
+            -c project_slug "tool-set-project" \
+            -c package_name "tool_set_project" \
+            --ignore license
       - name: Upload template instance
         uses: actions/upload-artifact@v5
         with:
