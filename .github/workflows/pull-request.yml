@@ -21,8 +21,11 @@ jobs:
       - name: Generate test template instance
         run: |
           # Overwrite defaults to make sure defaults are not part of the seeded template due to copy & paste
+          # "Special Instance Project Name" has same length as "%[cookiecutter.project_name]%" to avoid lint issues.
           cookiecutter --no-input --output-dir . template/ \
-            project_name="Test Instance" \
+            project_name="Special Instance Project Name" \
+            project_slug="test-instance" \
+            package_name="test_instance" \
             project_description="Some sample application." \
             author="GitHub Actions" \
             author_email="git@hub.actions" \

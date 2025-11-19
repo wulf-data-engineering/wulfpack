@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { dev } from '$app/environment';
 	import * as auth from '$lib/auth';
 	import { goto } from '$app/navigation';
 	import { Button } from '$lib/components/ui/button';

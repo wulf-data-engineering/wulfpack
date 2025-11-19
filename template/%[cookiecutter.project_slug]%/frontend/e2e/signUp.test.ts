@@ -1,9 +1,10 @@
 import { expect, test } from '@playwright/test';
 
-test('sign up', async ({ page, browser }, testInfo) => {
+test('sign up', async ({ page, browser }) => {
 	// Given: the home page with sign in box
 
-	const newEmail = '%[ cookiecutter.test_user_email ]%'.replace('@', `+e2e-${new Date().getTime()}-confirm@`);
+	const testUserEmail = '%[ cookiecutter.test_user_email ]%';
+	const newEmail = testUserEmail.replace('@', `+e2e-${new Date().getTime()}-confirm@`);
 
 	await page.goto('/');
 	await expect(page.locator('h1')).toBeVisible();
