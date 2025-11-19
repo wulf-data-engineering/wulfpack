@@ -26,6 +26,7 @@ jobs:
             project_description="Some sample application." \
             author="GitHub Actions" \
             author_email="git@hub.actions" \
+            copyright_pat_env_var="COPYLEFT_PAT" \
             test_user_email="test@hub.actions" \
             test_user_password="Test456$"
       - name: Verify template contains no default values
@@ -197,14 +198,14 @@ jobs:
           path: |
             ~/.npm
             test-instance/frontend/node_modules/
-          key: node-cache-${{ hashFiles('test-instance/frontend/package.json') }} # template doesn't include a lock file
+          key: node-cache-${{ hashFiles('test-instance/frontend/package-lock.json') }}
           restore-keys: node-cache-
       - name: Restore Playwright browsers cache
         uses: actions/cache@v4
         with:
           path: |
             ~/.cache/ms-playwright
-          key: playwright-browsers-${{ hashFiles('test-instance/frontend/package.json') }} # template doesn't include a lock file
+          key: playwright-browsers-${{ hashFiles('test-instance/frontend/package-lock.json') }}
           restore-keys: playwright-browsers-
       - name: Install frontend dependencies and Playwright browsers
         working-directory: test-instance/frontend/
