@@ -5,7 +5,7 @@ import * as Cdk from "../lib/cdk-stack";
 test("Lambda Function Created", () => {
   const app = new cdk.App();
   // WHEN
-  const stack = new Cdk.CdkLocalstackDemoStack(app, "MyTestStack");
+  const stack = new Cdk.CdkStack(app, "CdkTestStack");
   // THEN
   const template = Template.fromStack(stack);
 

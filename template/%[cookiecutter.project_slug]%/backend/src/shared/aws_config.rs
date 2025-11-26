@@ -1,5 +1,4 @@
-use aws_config::{BehaviorVersion, Region, SdkConfig};
-use aws_credential_types::{provider::ProvideCredentials, Credentials};
+use aws_config::{BehaviorVersion, ConfigLoader, Region, SdkConfig};
 
 const DEFAULT_REGION: &str = "eu-central-1";
 
@@ -26,9 +25,9 @@ fn default_cognito_endpoint() -> Option<String> {
 }
 
 #[cfg(any(debug_assertions, test))]
-fn default_credentials_provider() -> Option<impl ProvideCredentials> {
-    Some(
-        Credentials::builder()
+fn set_default_credentials_provider(config_loader: ConfigLoader) -> ConfigLoader {
+    config_loader.credentials_provider(
+        aws_credential_types::Credentials::builder()
             .access_key_id("local")
             .secret_access_key("local")
             .provider_name("dev")
@@ -37,8 +36,8 @@ fn default_credentials_provider() -> Option<impl ProvideCredentials> {
 }
 
 #[cfg(not(any(debug_assertions, test)))]
-fn default_credentials_provider() -> Option<impl ProvideCredentials> {
-    None
+fn set_default_credentials_provider(config_loader: ConfigLoader) -> ConfigLoader {
+    config_loader
 }
 
 /// Load AWS SDK configuration.
@@ -66,9 +65,7 @@ async fn load_aws_config_for_endpoint(endpoint: Option<String>) -> SdkConfig {
     if let Some(url) = &endpoint {
         loader = loader.endpoint_url(url);
     }
-    if let Some(credentials_provider) = default_credentials_provider() {
-        loader = loader.credentials_provider(credentials_provider);
-    }
+    loader = set_default_credentials_provider(loader);
     let region_name = std::env::var("AWS_REGION").unwrap_or(DEFAULT_REGION.to_string());
 
     loader = loader.region(Region::new(region_name));
