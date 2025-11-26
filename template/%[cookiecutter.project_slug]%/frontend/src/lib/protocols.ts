@@ -117,8 +117,8 @@ async function protocolImpl<Req = undefined, Res = undefined>(
 	}
 	init.headers = {
 		...init.headers,
+		accept: contentType,
 		...(body ? { 'content-type': contentType } : {}),
-		...(asJson ? { accept: contentType } : {}),
 		...(compressed ? { 'content-encoding': 'snappy' } : {})
 	};
 

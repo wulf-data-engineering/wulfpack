@@ -168,7 +168,7 @@ describe('protocols', () => {
 		);
 
 		expect(sentContentType).toBe('application/x-protobuf');
-		expect(sentAccept).toBeNull();
+		expect(sentAccept).toBe('application/x-protobuf');
 		expect(ProtoMock.decode(sentBody! as Uint8Array)).toEqual(requestMessage);
 
 		expect(response).toEqual(responseMessage);
@@ -194,7 +194,7 @@ describe('protocols', () => {
 
 		const response = await protocolLoad<ProtoMock>('/', ProtoMock);
 
-		expect(sentAccept).toBeNull();
+		expect(sentAccept).toBe('application/x-protobuf');
 		expect(response).toEqual(responseMessage);
 	});
 
@@ -219,7 +219,7 @@ describe('protocols', () => {
 
 		const response = await protocolLoad<ProtoMock>('/', ProtoMock);
 
-		expect(sentAccept).toBeNull();
+		expect(sentAccept).toBe('application/x-protobuf');
 		expect(response).toEqual(responseMessage);
 	});
 });

@@ -1,39 +1,27 @@
 import * as cdk from "aws-cdk-lib";
-import * as s3 from "aws-cdk-lib/aws-s3";
-import * as sqs from "aws-cdk-lib/aws-sqs";
-import { Construct } from "constructs";
-import { join } from "path";
-import { cargoLambdaFunction } from "./cargo-lambda-function";
+import {Construct} from "constructs";
+import {Backend} from "./constructs/backend";
+import {loadDeploymentConfig} from "./config";
+import {Frontend} from "./constructs/frontend";
 
-export class CdkLocalstackDemoStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
-    super(scope, id, props);
+export class CdkStack extends cdk.Stack {
+    constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+        super(scope, id, props);
 
-    new s3.Bucket(this, "SomeBucket", {
-      bucketName: "some-bucket",
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
-    });
+        let config = loadDeploymentConfig(scope);
 
-    const queue = new sqs.Queue(this, "SomeQueue", {
-      queueName: "some-queue",
-    });
+        this.terminationProtection = config.terminationProtection;
 
-    const messageHandler = cargoLambdaFunction(this, "MessageHandlerFunction", {
-      functionName: "message-handler-function",
-      // Path to the root directory.
-      manifestPath: join(__dirname, "..", "backend"),
-      binaryName: "message-handler",
-    });
+        const backend = new Backend(this, 'Backend', {config});
 
-    queue.grantConsumeMessages(messageHandler);
-
-    messageHandler.addEventSource(
-      new cdk.aws_lambda_event_sources.SqsEventSource(queue, {}),
-    );
-
-    cargoLambdaFunction(this, "PasswordPolicyFunction", {
-      functionName: "password-policy",
-      manifestPath: join(__dirname, "..", "backend"),
-    });
-  }
+        // Locally npm run dev is used instead
+        if (config.aws) {
+            new Frontend(this, 'Frontend', {
+                config,
+                backendApi: backend.restApi,
+                userPool: backend.userPool,
+                userPoolClient: backend.userPoolClient
+            });
+        }
+    }
 }

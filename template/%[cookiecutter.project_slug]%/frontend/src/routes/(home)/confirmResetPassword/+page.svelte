@@ -42,7 +42,7 @@
 				passwordPolicy = data;
 			})
 			.catch((err) => {
-				console.error('Error loading password policy via protocolFetch:', err);
+				console.error('Error loading password policy:', err);
 			});
 	});
 

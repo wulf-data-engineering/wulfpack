@@ -1,0 +1,84 @@
+import { Construct } from "constructs";
+import * as cognito from "aws-cdk-lib/aws-cognito";
+import * as route53 from "aws-cdk-lib/aws-route53";
+import * as ses from "aws-cdk-lib/aws-ses";
+import * as cdk from "aws-cdk-lib";
+import { backendLambda } from "./backend-lambda";
+import { DeploymentConfig } from "../../config";
+
+interface IdentityProps {
+  deploymentConfig: DeploymentConfig;
+}
+
+export class Identity extends Construct {
+  public readonly userPool: cognito.UserPool;
+  public readonly userPoolClient: cognito.UserPoolClient;
+
+  constructor(scope: Construct, id: string, props: IdentityProps) {
+    super(scope, id);
+
+    // set up the Lifecycle Lambda function
+    const cognitoHandler = backendLambda(this, "CognitoHandlerFunction", {
+      deploymentConfig: props.deploymentConfig,
+      binaryName: "cognito-handler",
+    });
+
+    let userPoolEmail: cognito.UserPoolEmail | undefined = undefined;
+
+    // --- domain & email setup ---
+    if (props.deploymentConfig.domain) {
+      const { domainName, hostedZone } = props.deploymentConfig.domain;
+
+      // create SES Identity (verifies the domain for sending), same region as the pool required
+      const sesIdentity = new ses.EmailIdentity(this, "SesIdentity", {
+        identity: ses.Identity.domain(domainName),
+        dkimSigning: true,
+      });
+
+      // add DKIM Records to Route53 (required for deliverability)
+      // proves domain ownership and prevents emails from going to spam
+      sesIdentity.dkimRecords.forEach((record, index) => {
+        new route53.CnameRecord(this, `DkimRecord${index}`, {
+          zone: hostedZone,
+          recordName: record.name,
+          domainName: record.value,
+        });
+      });
+
+      // Configure User Pool to use this SES Identity
+      userPoolEmail = cognito.UserPoolEmail.withSES({
+        sesRegion: cdk.Stack.of(this).region, // Must match stack region
+        fromEmail: `%[ cookiecutter.email_sender_address ]%`,
+        fromName: "%[ cookiecutter.email_sender_name ]%",
+        replyTo: `%[ cookiecutter.email_replyto ]%`,
+      });
+    }
+
+    this.userPool = new cognito.UserPool(this, "UserPool", {
+      selfSignUpEnabled: true,
+      signInAliases: { email: true },
+      autoVerify: { email: true },
+      accountRecovery: cognito.AccountRecovery.EMAIL_ONLY,
+      email: userPoolEmail,
+      passwordPolicy: {
+        minLength: 8,
+        requireSymbols: true,
+      },
+      lambdaTriggers: {
+        preSignUp: cognitoHandler,
+        postConfirmation: cognitoHandler,
+        customMessage: cognitoHandler,
+      },
+      removalPolicy: props.deploymentConfig.removalPolicy,
+    });
+
+    this.userPoolClient = new cognito.UserPoolClient(this, "UserPoolClient", {
+      userPool: this.userPool,
+      generateSecret: false,
+      authFlows: {
+        userSrp: true,
+      },
+      preventUserExistenceErrors: true,
+    });
+  }
+}

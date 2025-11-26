@@ -23,20 +23,36 @@ export const isLoadingUser = derived(currentUser, (u) => u === undefined);
 
 let configured = false;
 
+type Config = {
+	userPoolId: string;
+	userPoolClientId: string;
+	endpoint?: string;
+};
+
 /**
- * Configure Amplify Auth from environment variables.
- * Uses local Cognito mock values if none are provided.
+ * Configure Amplify Auth from /config.json (AWS) or environment variables (dev, defaults to local
+ * Cognito mock values).
  * Provides the configured Amplify and Auth namespaces via Svelte stores.
  * Called in onMount of the base layout.
  */
 export async function configureAuth() {
 	if (configured) return;
 
-	const userPoolId: string = import.meta.env.VITE_USER_POOL_ID || (dev && 'local_userPool');
-	const userPoolClientId: string =
-		import.meta.env.VITE_USER_POOL_CLIENT_ID || (dev && 'local_userPoolClient');
-	const endpoint: string | undefined =
-		import.meta.env.VITE_COGNITO_ENDPOINT || (dev && 'http://localhost:9229');
+	async function loadConfig(): Promise<Config> {
+		if (dev) {
+			return {
+				userPoolId: import.meta.env.VITE_USER_POOL_ID || 'local_userPool',
+				userPoolClientId: import.meta.env.VITE_USER_POOL_CLIENT_ID || 'local_userPoolClient',
+				endpoint: import.meta.env.VITE_COGNITO_ENDPOINT || 'http://localhost:9229'
+			};
+		} else {
+			const response = await fetch('/config.json');
+			if (!response.ok) throw new Error(`Failed to load config: ${response.statusText}`);
+			return await response.json();
+		}
+	}
+
+	const { userPoolId, userPoolClientId, endpoint } = await loadConfig();
 
 	const importedAmplify: Amplify = (await import('aws-amplify')).Amplify;
 	const importedAuthApi: AuthApi = await import('aws-amplify/auth');
@@ -134,7 +150,7 @@ export async function signIn(username: string, password: string) {
 		username: username,
 		password: password,
 		options: {
-			authFlowType: 'USER_PASSWORD_AUTH'
+			authFlowType: dev ? 'USER_PASSWORD_AUTH' : 'USER_SRP_AUTH'
 		}
 	});
 	if (!user.isSignedIn) {
