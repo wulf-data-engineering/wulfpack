@@ -15,6 +15,12 @@ The source code for the generated project lives in `template/`.
 - `template/cookiecutter.json`: Defines the variables and default values.
 - `template/%[cookiecutter.project_slug]%/`: The root of the generated project.
 
+#### Wording
+
+- `.` is the **template repo/repository**.
+- `template/%[cookiecutter.project_slug]%/` is the **template**.
+- `tmp/tool-set-project/` is a **template instance** when generated.
+
 ### 2. Jinja2 Delimiters
 
 **CRITICAL**: This project uses **custom Jinja2 delimiters** to avoid conflicts with Svelte, Cargo and other frameworks.
