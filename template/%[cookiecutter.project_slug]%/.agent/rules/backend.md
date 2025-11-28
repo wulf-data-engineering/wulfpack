@@ -30,6 +30,18 @@ Add or change Rust lambdas in the `backend/src/` folder.
 Use `lambda_http` for Lambdas exposed via API Gateway.
 Use `lambda_runtime` for event handlers or lifecycle hooks.
 
+To use a protocol defined in `protocols/<name>.proto`:
+1.  Import the `protocol_macro`:
+    ```rust
+    use protocol_macro::protocols;
+    ```
+2.  Define a module for the protocol:
+    ```rust
+    #[protocols("<name>")]
+    pub mod protocols {}
+    ```
+The macro will make the Protocol Buffer types in the module available with `use`.
+
 Register new lambdas in Cargo.toml.
 
 Define new API lambdas in `infrastructure/lib/constructs/backend/api.ts`.
