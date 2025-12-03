@@ -2,19 +2,50 @@ import * as cdk from "aws-cdk-lib";
 import { Template } from "aws-cdk-lib/assertions";
 import * as Cdk from "../lib/cdk-stack";
 
-test("Lambda Function Created", () => {
-  const app = new cdk.App();
-  // WHEN
+test("Snapshot Test", () => {
+  console.log("AWS_ENDPOINT_URL before:", process.env.AWS_ENDPOINT_URL);
+  delete process.env.AWS_ENDPOINT_URL;
+  console.log("AWS_ENDPOINT_URL after:", process.env.AWS_ENDPOINT_URL);
+  const app = new cdk.App({
+    context: {
+      "environment": "test",
+      "project_slug": "tool-set-iac-test",
+      "package_name": "tool_set_iac_test",
+      "domain_name": "example.com",
+      "hosted_zone_id": "Z1234567890",
+      "email_sender_address": "noreply@example.com",
+      "email_sender_name": "Test Sender",
+      "email_replyto": "noreply@example.com",
+      "aws": true
+    }
+  });
   const stack = new Cdk.CdkStack(app, "CdkTestStack");
-  // THEN
   const template = Template.fromStack(stack);
 
-  template.hasResourceProperties("AWS::Lambda::Function", {
-    FunctionName: "hello-lambda",
-    Handler: "hello.handler",
-    Runtime: "nodejs18.x",
-    Description: "A simple Lambda function that returns a greeting",
-    MemorySize: 128,
-    Timeout: 10,
+  expect(template.toJSON()).toMatchSnapshot();
+});
+
+test("Infrastructure Created", () => {
+  delete process.env.AWS_ENDPOINT_URL;
+  const app = new cdk.App({
+    context: {
+      "environment": "test",
+      "project_slug": "tool-set-iac-test",
+      "package_name": "tool_set_iac_test",
+      "domain_name": "example.com",
+      "hosted_zone_id": "Z1234567890",
+      "email_sender_address": "noreply@example.com",
+      "email_sender_name": "Test Sender",
+      "email_replyto": "noreply@example.com",
+      "aws": true
+    }
+  });
+  const stack = new Cdk.CdkStack(app, "CdkTestStack");
+  const template = Template.fromStack(stack);
+
+
+  // Verify API Gateway
+  template.hasResourceProperties("AWS::ApiGateway::RestApi", {
+    Name: "Api"
   });
 });
