@@ -95,7 +95,11 @@ jobs:
         run: npm i
       - name: Generate Protocol Buffer files
         run: npm run gen:proto
-      - name: Check formatting & lint
+      - name: Check formatting
+        id: format
+        run: npm run check-format
+        continue-on-error: true
+      - name: Linting
         id: lint
         run: npm run lint
         continue-on-error: true
@@ -111,6 +115,7 @@ jobs:
         if: always() # ensure this runs even if earlier steps failed
         run: |
           echo "lint outcome:   ${{ steps.lint.outcome }}"
+          echo "format outcome: ${{ steps.format.outcome }}"
           echo "check outcome:  ${{ steps.check.outcome }}"
           echo "tests outcome:  ${{ steps.tests.outcome }}"
 

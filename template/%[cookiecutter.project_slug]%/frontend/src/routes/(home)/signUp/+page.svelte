@@ -6,12 +6,19 @@
 	import { toastError, toastSuccess } from '../toasts';
 	import { ValidatedInput } from '$lib/components/validatedInput';
 	import { ValidatedForm } from '$lib/components/validatedForm';
-	import { validateEmail, validateNewPassword, validatePasswordRepetition } from '$lib/validation';
+	import {
+		validateEmail,
+		validateName,
+		validateNewPassword,
+		validatePasswordRepetition
+	} from '$lib/validation';
 	import { onMount } from 'svelte';
 	import { protocolLoad } from '$lib/protocols';
-	import { PasswordPolicy } from '$lib/proto/password_policy';
+	import { PasswordPolicy } from '$lib/proto/password_policy/password_policy';
 
 	let email = $state('');
+	let firstName = $state('');
+	let lastName = $state('');
 	let password = $state('');
 	let confirm = $state('');
 
@@ -32,7 +39,8 @@
 	async function handleSubmit() {
 		submitting = true;
 		try {
-			const result = await auth.signUp(email, password);
+			const signUpData = { firstName, lastName };
+			const result = await auth.signUp(email, password, signUpData);
 			console.log('Sign up:', result);
 			if (result.isSignUpComplete) {
 				toastSuccess('Signed Up', 'Successfully signed up and signed in.');
@@ -63,6 +71,22 @@
 	<Card.Content>
 		<ValidatedForm id="form" onsubmit={handleSubmit}>
 			<div class="flex flex-col gap-6">
+				<ValidatedInput
+					id="firstName"
+					label="First Name"
+					type="text"
+					bind:value={firstName}
+					validations={[validateName]}
+				/>
+
+				<ValidatedInput
+					id="lastName"
+					label="Last Name"
+					type="text"
+					bind:value={lastName}
+					validations={[validateName]}
+				/>
+
 				<ValidatedInput
 					id="email"
 					label="Email"

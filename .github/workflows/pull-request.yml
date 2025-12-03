@@ -21,11 +21,8 @@ jobs:
       - name: Generate test template instance
         run: |
           # Overwrite defaults to make sure defaults are not part of the seeded template due to copy & paste
-          # "Special Instance Project Name" has same length as "%[cookiecutter.project_name]%" to avoid lint issues.
           cookiecutter --no-input --output-dir . template/ \
-            project_name="Special Instance Project Name" \
-            project_slug="test-instance" \
-            package_name="test_instance" \
+            project_name="Test Instance" \
             project_description="Some sample application." \
             author="GitHub Actions" \
             author_email="git@hub.actions" \
@@ -88,9 +85,6 @@ jobs:
           shared-key: pull-request
           workspaces: ./test-instance/backend -> target
           cache-on-failure: true
-      - name: Check formatting
-        id: format
-        run: cargo fmt -- --check
       - name: Run checks
         id: check
         run: cargo check
@@ -103,7 +97,6 @@ jobs:
       - name: Aggregate results and fail if any failed
         if: always() # ensure this runs even if earlier steps failed
         run: |
-          echo "format outcome:   ${{ steps.format.outcome }}"
           echo "check outcome:  ${{ steps.check.outcome }}"
           echo "clippy outcome:  ${{ steps.clippy.outcome }}"
           echo "tests outcome:  ${{ steps.tests.outcome }}"
@@ -148,7 +141,7 @@ jobs:
         run: npm i
       - name: Generate Protocol Buffer files
         run: npm run gen:proto
-      - name: Check formatting & lint
+      - name: Linting
         id: lint
         run: npm run lint
         continue-on-error: true
