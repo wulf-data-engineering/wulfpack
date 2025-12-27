@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Cache pip
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cache/pip
           key: pip-cache-cookiecutter
@@ -177,7 +177,7 @@ jobs:
         with:
           node-version: "20"
       - name: Restore cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.npm
@@ -261,7 +261,7 @@ jobs:
         with:
           node-version: "20"
       - name: Restore npm cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.npm
@@ -270,7 +270,7 @@ jobs:
           key: node-cache-${{ hashFiles('test-instance/frontend/package-lock.json') }}-${{ hashFiles('test-instance/infrastructure/package-lock.json') }}
           restore-keys: node-cache-
       - name: Restore Playwright browsers cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.cache/ms-playwright
