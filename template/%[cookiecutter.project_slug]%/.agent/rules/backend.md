@@ -67,7 +67,11 @@ At the end of development run `cargo format`, `cargo check` & `cargo clippy`.
 
 ## Troubleshooting
 
-## Rust build
+### Rust build
 
-If the Rust build fails in cdk synth (especially linking errors or missing system dependencies), checks if the Docker image in `infrastructure/lib/constructs/backend/backend-lambda.ts` is outdated.
-Suggest updating to a newer YYYYMMDD tag of `ghcr.io/wulf-data-engineering/levity-lambda-builder` if one exists.
+If the Rust build fails in `cdk synth` (especially linking errors or missing system dependencies), check if the Docker image in `infrastructure/lib/constructs/backend/backend-lambda.ts` is outdated.
+
+**Steps to verify:**
+1.  Locate the current image tag (e.g., `20251227`) in `backend-lambda.ts`.
+2.  Compare it with the tag used in the [upstream template](https://github.com/wulf-data-engineering/wulfpack/blob/main/template/%[cookiecutter.project_slug]%/infrastructure/lib/constructs/backend/backend-lambda.ts).
+3.  If a newer date-based tag exists upstream, suggest updating the local version.
