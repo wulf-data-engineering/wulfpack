@@ -10,7 +10,7 @@ jobs:
     outputs:
       instance-path: ${{ steps.set-path.outputs.path }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Cache pip
         uses: actions/cache@v4
         with:
@@ -56,7 +56,7 @@ jobs:
     outputs:
       builder: ${{ steps.filter.outputs.builder }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: dorny/paths-filter@v3
         id: filter
         with:
@@ -69,7 +69,7 @@ jobs:
     needs: check-builder-image
     if: needs.check-builder-image.outputs.builder == 'true'
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Build local builder
         run: docker build -f Dockerfile.lambda-builder -t local-builder .
       - name: Smoke test
