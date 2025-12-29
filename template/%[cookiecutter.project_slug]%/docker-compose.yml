@@ -11,6 +11,7 @@ services:
       - DEBUG=0
       - AWS_ACCESS_KEY_ID=test
       - AWS_SECRET_ACCESS_KEY=test
+      - DEFAULT_REGION=eu-central-1
     volumes:
       - "./local/localstack-volume:/var/lib/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock" # required for lambdas
