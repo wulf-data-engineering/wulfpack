@@ -8,6 +8,6 @@ const isLocal = process.env.AWS_ENDPOINT_URL?.startsWith('http://') ?? false;
 new CdkStack(app, 'CdkStack', {
     env: {
         account: isLocal ? '000000000000' : process.env.CDK_DEFAULT_ACCOUNT,
-        region: isLocal ? 'eu-central-1' : process.env.CDK_DEFAULT_REGION
+        region: isLocal ? '%[ cookiecutter.default_region ]%' : process.env.CDK_DEFAULT_REGION
     },
 });

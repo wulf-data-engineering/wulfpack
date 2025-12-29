@@ -1,6 +1,6 @@
 use aws_config::{BehaviorVersion, ConfigLoader, Region, SdkConfig};
 
-const DEFAULT_REGION: &str = "eu-central-1";
+const DEFAULT_REGION: &str = "%[ cookiecutter.default_region ]%";
 
 // LocalStack endpoint for local development and integration testing
 #[cfg(any(debug_assertions, test))]

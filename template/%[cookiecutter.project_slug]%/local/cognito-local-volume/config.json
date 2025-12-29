@@ -1,7 +1,7 @@
 {
   "LambdaClient": {
     "endpoint": "http://host.docker.internal:9000",
-    "region": "eu-central-1",
+    "region": "%[ cookiecutter.default_region ]%",
     "credentials": {
       "accessKeyId": "test",
       "secretAccessKey": "test"

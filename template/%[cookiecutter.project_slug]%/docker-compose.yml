@@ -11,7 +11,7 @@ services:
       - DEBUG=0
       - AWS_ACCESS_KEY_ID=test
       - AWS_SECRET_ACCESS_KEY=test
-      - DEFAULT_REGION=eu-central-1
+      - DEFAULT_REGION=%[ cookiecutter.default_region ]%
     volumes:
       - "./local/localstack-volume:/var/lib/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock" # required for lambdas
@@ -24,7 +24,7 @@ services:
       - "host.docker.internal:host-gateway" # to connect cargo lambda watch
     environment:
       - CODE=123456 # fixed code for UI tests
-      - AWS_REGION=eu-central-1
+      - AWS_REGION=%[ cookiecutter.default_region ]%
       - AWS_ACCESS_KEY_ID=test
       - AWS_SECRET_ACCESS_KEY=test
     volumes:
