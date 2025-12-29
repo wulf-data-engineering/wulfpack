@@ -8,6 +8,7 @@
   "license": ["MIT", "BSD-3-Clause", "GPL-3.0-only", "Apache-2.0", "empty"],
   "copyright_initial_year": "%%[ now 'utc', '%Y' ]%%",
   "copyright_pat_env_var": "COPYRIGHT_PAT",
+  "default_region": "eu-central-1",
   "domain_name": "wulfpack.wulf.technology",
   "hosted_zone_id": "undefined",
   "staging_hosted_zone_id": "undefined",
@@ -41,7 +42,8 @@
     "email_sender_name": "Readable name used as sender for outgoing mails",
     "email_replyto": "Reply-To email address for outgoing mails",
     "test_user_email": "Email for initial test user in development",
-    "test_user_password": "Initial password for the test user"
+    "test_user_password": "Initial password for the test user",
+    "default_region": "Default AWS region for the project"
   },
 
   "_copy_without_render": [
