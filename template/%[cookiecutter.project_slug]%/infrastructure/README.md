@@ -38,38 +38,11 @@ The hosted zone id is optional, CDK will look it up automatically if not provide
 
 ## Requirements
 
-CDK & Docker
+CDK (+ Local) & Docker
 
 ```bash
-npm install -g aws-cdk
-cdk --version  # to verify installation
-```
-
-## Configuration
-
-### ~/.aws/config
-
-```
-[profile localstack]
-source_profile = localstack
-region = eu-central-1
-output = json
-```
-
-### ~/.aws/credentials
-
-```
-[localstack]
-aws_access_key_id=test
-aws_secret_access_key=test
-```
-
-### ~/.zshrc
-
-There is cdklocal as a tool, but it causes some trouble on macOS.
-
-```bash
-alias cdklocal="AWS_PROFILE=localstack AWS_ENDPOINT_URL=\"http://127.0.0.1:4566\" cdk"
+npm install -g aws-cdk-local aws-cdk
+cdklocal --version  # to verify installation of both
 ```
 
 ## Useful commands
