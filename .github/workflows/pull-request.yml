@@ -229,81 +229,48 @@ jobs:
       - test-infrastructure
     env:
       CI: "true"
+      AWS_ENDPOINT_URL: "http://172.17.0.1:4566"
+      AWS_ACCESS_KEY_ID: "test"
+      AWS_SECRET_ACCESS_KEY: "test"
+      AWS_REGION: "eu-central-1"
+    container:
+      image: ghcr.io/wulf-data-engineering/levity-e2e:latest
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+      # We mount docker socket to start LocalStack sibling container
+      volumes:
+        - /var/run/docker.sock:/var/run/docker.sock
     steps:
       - name: Download test template instance
         uses: actions/download-artifact@v7
         with:
           name: test-instance
           path: ./test-instance
-      - name: Run docker compose # early so that localstack is ready for CDK
+      - name: Start services
         uses: hoverkraft-tech/compose-action@v2.4.2
         with:
           compose-file: "./test-instance/docker-compose.yml"
           services-log-level: info
-      - name: Install Protoc
-        uses: arduino/setup-protoc@v3
-      - uses: Swatinem/rust-cache@v2
-        with:
-          shared-key: pull-request
-          workspaces: ./test-instance/backend -> target
-          cache-on-failure: true
-      - name: Install Rust
-        run: rustup toolchain install stable
-      - name: Install latest cargo-lambda binary
+
+      - name: Install dependencies & Build
         run: |
-          TAG=$(curl -s https://api.github.com/repos/cargo-lambda/cargo-lambda/releases/latest | jq -r .tag_name)
-          echo "Latest tag is $TAG"
-          ARCH=$(uname -m)
-          if [ "$ARCH" = "x86_64" ]; then
-            ASSET="cargo-lambda-$TAG.x86_64-unknown-linux-musl.tar.gz"
-          elif [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
-            ASSET="cargo-lambda-$TAG.aarch64-unknown-linux-musl.tar.gz"
-          else
-            echo "Unsupported architecture: $ARCH"
-            exit 1
-          fi
-          echo "Downloading $ASSET"
-          curl -fL -o /tmp/cargo-lambda.tar.gz \
-            "https://github.com/cargo-lambda/cargo-lambda/releases/download/$TAG/$ASSET"
-          tar -xzf /tmp/cargo-lambda.tar.gz -C /usr/local/bin
-      - name: Setup node
-        uses: actions/setup-node@v6
-        with:
-          node-version: "20"
-      - name: Restore npm cache
-        uses: actions/cache@v5
-        with:
-          path: |
-            ~/.npm
-            test-instance/frontend/node_modules/
-            test-instance/infrastructure/node_modules/
-          key: node-cache-${{ hashFiles('test-instance/frontend/package-lock.json') }}-${{ hashFiles('test-instance/infrastructure/package-lock.json') }}
-          restore-keys: node-cache-
-      - name: Install frontend dependencies
-        working-directory: test-instance/frontend/
-        run: |
+          # Add cargo to path (installed in Dockerfile.e2e)
+          export PATH="$HOME/.cargo/bin:$PATH"
+
+          echo ">>> Building Backend"
+          cd test-instance/backend && cargo build && cd ../..
+
+          echo ">>> Deploying Infrastructure"
+          cd test-instance/infrastructure
           npm ci
-          npx playwright install
-          npx playwright --version
-      - name: Install infrastructure dependencies
-        working-directory: test-instance/infrastructure/
-        run: |
-          npm ci
-          npx cdk --version
-      - name: Generate Protocol Buffer files for frontend
-        working-directory: test-instance/frontend/
-        run: npm run gen:proto
-      - name: Build backend for faster start of cargo lambda watch
-        working-directory: test-instance/backend/
-        run: cargo build
-      - name: Deploy CDK to LocalStack
-        working-directory: test-instance/infrastructure/
-        run: |
-          # Wait up to 60 seconds for cloudformation in localstack to be available
-          timeout 60s bash -c 'until curl -s http://localhost:4566/_localstack/health | grep "\"cloudformation\": \"available\""; do echo "waiting for cloudformation..."; sleep 2; done'
-          echo "LocalStack CloudFormation is ready."
+
+          # Check localstack health via Gateway IP
+          timeout 60s bash -c 'until curl -s http://172.17.0.1:4566/_localstack/health | grep "\"cloudformation\": \"available\""; do echo "waiting for cloudformation..."; sleep 2; done'
+
           npm run cdklocal:bootstrap
           npm run cdklocal:deploy
+
       - name: Start cargo-lambda watch in background
         working-directory: test-instance/backend/
         run: |
@@ -313,19 +280,7 @@ jobs:
           echo "Started cargo lambda watch running on pid $CARGO_PID"
       - name: Run Playwright tests
         working-directory: test-instance/frontend/
-        run: |
-          # Run inside the Playwright container to avoid installing system dependencies on the host.
-          # We use --network host to access LocalStack and other services running on the host.
-          # We mount the workspace to preserve source code and node_modules.
-          # We use a specific image version but run 'npx playwright install' to ensure binary compatibility
-          # with the installed @playwright/test version (if they differ).
-          docker run --rm \
-            --network host \
-            -v "$GITHUB_WORKSPACE:/work" \
-            -w "/work/test-instance/frontend" \
-            -e CI="true" \
-            mcr.microsoft.com/playwright:v1.57.0-noble \
-            /bin/bash -c "npx playwright install && npm run test:e2e"
+        run: npm run test:e2e
       - name: Upload Playwright test results
         id: upload-playwright
         if: failure()
