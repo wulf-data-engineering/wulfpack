@@ -17,7 +17,10 @@ This workflow generates a fresh instance of the template in a temporary director
     ```
 
 2.  **Determine Project Slug**
-    Choose a context-specific slug for your instance, e.g., `tool-set-project_dynamodb` or `tool-set-project_auth`.
+    Choose a context-specific slug for your instance, e.g., `levity-project_dynamodb` or `levity-project_auth`.
+
+    
+    Ref: @../../template/cookiecutter.json
     
     *Variable*: `PROJECT_SLUG`
 
@@ -52,11 +55,6 @@ This workflow generates a fresh instance of the template in a temporary director
     git add .
     git commit -m "Baseline"
     ```
-    
-6.  **Context Switch Warning**
-    You are about to switch context to the generated instance.
-    **Note**: The instance has its own `.agent/rules/global.md`. Do not confuse them with the repository-level rules.
-    When in doubt about backporting or template structure, always refer back to the **repository rules** (`../../.agent/rules/global.md`).
-
-7.  **Ready**
-    You can now continue with the `develop-feature.md` workflow.
+   
+6.  **Ready**
+    You can now continue with the @develop-feature.md workflow.

@@ -6,27 +6,24 @@ description: Backport changes from a template instance to the template source
 
 ## Steps
 
-1.  **Read Repository Rules (CRITICAL)**
-    Since you have been working in the instance, you may have "forgotten" the main repository's rules.
-    **You MUST read them now to recall the backporting policies.**
-
-    ```bash
-    // turbo
-    cat ../wulfpack/.agent/rules/global.md
-    ```
+1.  **Reflect Different Work**
+    You have been working in the instance. You now work on the template.
 
 2.  **Verify Instance State**
     Ensure that you have fully verified your changes in `../levity-instances/<PROJECT_SLUG>` (ran tests, checked UI, ran linters, ran formatters, etc.).
     **Do not backport untested and unchecked code.**
     **Do not backport unformatted code.**
 
+3.  **Check branch**
+    Check the branch and state of this repository, the template repository.
+    Follow the rule @../rules/changing-files.md
+
 2.  **Ask for User Approval (CRITICAL)** 
     State that the feature is complete, you ran all tests, linters and formatters.
     Explicitly ask the user if they want to proceed with the backport.
     If changes can be verified through the UI suggest to start the UI server and list URLs to the specific pages. 
     **CRITICAL: Wait for the user to confirm.**
-    **CRITICAL: If the user asks for further changes switch back to the `feature-workflow.md` workflow again.**
-    **CRITICAL: Do not change files on the main branch. Suggest to switch to a branch first**
+    **CRITICAL: If the user asks for further changes switch back to the @feature-workflow.md workflow again.**
 
 3.  **Identify Changed Files**
     List the files you modified in `../levity-instances/<PROJECT_SLUG>`:
@@ -53,15 +50,15 @@ description: Backport changes from a template instance to the template source
     2.  Read the content of the _instance_ file (your modified version).
     3.  Apply the logic changes from the instance to the template file.
     4.  **Check for Placeholders**: Ensure that any dynamic values (project names, slugs, etc.) are still represented by their Jinja2 tags (`%[ ... ]%`) in the template file.
+    5. **Check for TODOs** You might have placed TODO comments with the correct placeholders during @develop-feature.md
 
     > **Warning**: If you introduced a _new_ file, check if it needs any placeholders (e.g., if it imports the package name).
     > Consider the template/cookiecutter.json file for reference on what placeholders with which values are available.
 
     **Check using git status in both, template repository and instance to verify all changed files have been backported.**
 
-
 6.  **Verify Template Integrity**
-    After backporting, run the `instantiate-template.md` workflow _again_ to a _new_ location (e.g., `../levity-instances/<VERIFICATION_SLUG>`) and verify that:
+    After backporting, run the @instantiate-template.md workflow _again_ to a _new_ location (e.g., `../levity-instances/<VERIFICATION_SLUG>`) and verify that:
     1.  Cookiecutter runs without error.
     2.  The new instance contains your changes.
     3.  The placeholders were correctly substituted (i.e., you don't see `%[ ... ]%` in the generated file).
