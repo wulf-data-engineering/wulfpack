@@ -92,6 +92,8 @@ jobs:
           name: test-instance
           path: ./test-instance
       - uses: bufbuild/buf-setup-action@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Lint protocols
         uses: bufbuild/buf-lint-action@v1
         with:
@@ -111,6 +113,8 @@ jobs:
           path: ./test-instance
       - name: Install Protoc
         uses: arduino/setup-protoc@v3
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: ./test-instance/backend
@@ -159,9 +163,10 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v6
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           node-version: "20"
-          cache: 'npm'
-          cache-dependency-path: 'test-instance/infrastructure/package-lock.json'
+          cache: "npm"
+          cache-dependency-path: "test-instance/infrastructure/package-lock.json"
       - name: Install dependencies
         run: npm ci
       - name: Run tests
@@ -181,12 +186,15 @@ jobs:
           path: ./test-instance
       - name: Install Protoc
         uses: arduino/setup-protoc@v3
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup node
         uses: actions/setup-node@v6
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           node-version: "20"
-          cache: 'npm'
-          cache-dependency-path: 'test-instance/frontend/package-lock.json'
+          cache: "npm"
+          cache-dependency-path: "test-instance/frontend/package-lock.json"
       - name: Install dependencies
         run: npm ci
       - name: Generate Protocol Buffer files
@@ -235,6 +243,8 @@ jobs:
           path: ./test-instance
       - name: Install Protoc
         uses: arduino/setup-protoc@v3
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: ./test-instance/backend
@@ -242,8 +252,10 @@ jobs:
       - name: Install Rust
         run: rustup toolchain install stable
       - name: Install latest cargo-lambda binary
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TAG=$(curl -s https://api.github.com/repos/cargo-lambda/cargo-lambda/releases/latest | jq -r .tag_name)
+          TAG=$(curl -H "Authorization: Bearer $GITHUB_TOKEN" -s https://api.github.com/repos/cargo-lambda/cargo-lambda/releases/latest | jq -r .tag_name)
           echo "Latest tag is $TAG"
           ARCH=$(uname -m)
           if [ "$ARCH" = "x86_64" ]; then
@@ -261,13 +273,15 @@ jobs:
       - name: Run docker compose
         uses: hoverkraft-tech/compose-action@v2.4.2
         with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           compose-file: "./test-instance/docker-compose.yml"
           services-log-level: info
       - name: Setup node
         uses: actions/setup-node@v6
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           node-version: "20"
-          cache: 'npm'
+          cache: "npm"
           cache-dependency-path: |
             test-instance/frontend/package-lock.json
             test-instance/infrastructure/package-lock.json
@@ -308,7 +322,7 @@ jobs:
             -w /work \
             -e CI=true \
             mcr.microsoft.com/playwright:v1.57.0-noble \
-            npx playwright test        
+            npx playwright test
       - name: Upload Playwright test results
         id: upload-playwright
         if: failure()
