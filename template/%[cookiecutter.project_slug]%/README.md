@@ -1,8 +1,3 @@
-## 🤖 AI Agent Instructions
-
-If you are an AI agent assisting with this repository, you **MUST** read `CONTEXT.md` before planning & generating code.
-
----
 
 # Structure
 
@@ -16,6 +11,12 @@ The project is structured as follows:
 - `docker-compose.yml` defines services for local development.
 
 # Development
+
+## Getting Started
+
+To get started, launch the onboarding workflow in Antigravity:
+
+Just type `/onboarding` in the chat. The agent will guide you through the onboarding process.
 
 ## Docker Service
 

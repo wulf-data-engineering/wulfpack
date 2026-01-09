@@ -15,4 +15,4 @@ If `main` has pending changes, inform the user about that.
 
 **CRITICAL**: If this repository is on a branch that is not yours, it might be used by another agent!
 
-Then check out a branch. The name of a test instance is a good branch name.
+Then check out a new branch.
