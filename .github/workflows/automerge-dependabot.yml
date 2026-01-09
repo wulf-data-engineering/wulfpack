@@ -15,19 +15,36 @@ jobs:
         uses: dependabot/fetch-metadata@v2
         with:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
-      - name: Verify no human commits # Otherwise committers might get around approvals
+
+      - name: Security Check and Auto-Merge
         run: |
-          COMMITS=$(gh pr view "$PR_URL" --json commits --template '{{range .commits}}{{.author.login}}{{"\n"}}{{end}}' | uniq)
-          if [ "$COMMITS" != "dependabot" ] && [ "$COMMITS" != "dependabot[bot]" ]; then
-            echo "Detected non-dependabot commits: $COMMITS"
-            exit 1
+          # 1. Identify all unique contributors to the PR
+          LOGINS=$(gh pr view "$PR_URL" --json commits --template '{{range .commits}}{{if .author}}{{.author.login}}{{"\n"}}{{end}}{{if .committer}}{{.committer.login}}{{"\n"}}{{end}}{{end}}' | sort -u)
+          
+          # 2. Check for human logins (anything other than dependabot[bot])
+          HUMAN_LOGINS=$(echo "$LOGINS" | grep -vE "^(dependabot\[bot\]|dependabot|)$" || true)
+          
+          if [ -n "$HUMAN_LOGINS" ]; then
+            echo "Security Alert: Human commits detected ($HUMAN_LOGINS)."
+            
+            # 3. Check if there is an existing approval from the bot to withdraw
+            # We look for 'APPROVED' reviews specifically from the github-actions bot
+            EXISTING_APPROVAL=$(gh pr view "$PR_URL" --json reviews --template '{{range .reviews}}{{if and (eq .state "APPROVED") (eq .author.login "github-actions")}}{{.id}}{{"\n"}}{{end}}{{end}}' | head -n 1)
+            
+            if [ -n "$EXISTING_APPROVAL" ]; then
+              echo "Withdrawing stale bot approval..."
+              gh pr review "$PR_URL" --dismiss -m "Security: Human commits detected. Withdrawing auto-approval."
+            fi
+            exit 0
           fi
-        env:
-          PR_URL: ${{github.event.pull_request.html_url}}
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-      - name: Approve and enable auto-merge
-        if: steps.metadata.outputs.update-type != 'version-update:semver-major'
-        run: |
+
+          # 4. Filter out Major Updates
+          if [ "${{ steps.metadata.outputs.update-type }}" == "version-update:semver-major" ]; then
+            echo "Major version update. Skipping auto-merge."
+            exit 0
+          fi
+
+          # 5. Approve and enable auto-merge
           gh pr review --approve "$PR_URL"
           gh pr merge --auto --squash "$PR_URL"
         env:
