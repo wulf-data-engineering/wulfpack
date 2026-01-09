@@ -1,58 +1,40 @@
 ---
-description: Onboarding guide for new developers (MCP Setup, Shell Aliases)
+description: Onboarding guide for new developers (requirements, MCP server setup)
 ---
 
-# Developer Onboarding
+# Onboarding
 
-Welcome! This guide helps you set up your environment for maximum productivity with this template.
+Start implementation plan with greeting to developer that you will guide through setup.
 
-## 1. Shell Configuration
+# Requirements
 
-### Docker Compose Alias
+Run command to check for missing requirements:
 
-The project relies on `docker compose` (v2), but AI assistants often try to use the legacy `docker-compose` command. To prevent friction and errors, please add an alias to your shell configuration (`~/.zshrc`, `~/.bashrc`, etc.):
+// turbo-all
 
 ```bash
-alias docker-compose="docker compose"
+echo "git" && \
+git --version && \
+echo "cargo" && \
+cargo --version && \
+echo "cargo lambda" && \
+cargo lambda --version && \
+echo "npm" && \
+npm --version && \
+echo "docker" && \
+docker --version && \
+echo "docker compose" && \
+docker compose version && \
+echo "aws" && \
+aws --version &&  \
+echo "done"
 ```
 
-## 2. Setup Model Context Protocol (MCP)
+Add tasks to install missing dependencies to implementation plan.
 
-To enable your AI assistant to understand Svelte 5 (Runes), AWS resources, and more, you need to configure the **Model Context Protocol (MCP)** servers in your global settings.
+# MCP servers
 
-### Open Configuration
-
-You can open the configuration in two ways:
-
-#### Option A: Via GUI
-
-1.  Click the **Agent** tab in Antigravity.
-2.  Click the **...** (Additional Options) menu.
-3.  Select **MCP Servers** > **Manage MCP Servers**.
-4.  Click **View Raw Config**.
-
-#### Option B: Direct File Edit
-
-Open the global configuration file at:
-`~/.gemini/antigravity/mcp_config.json`
-
-### Add Svelte Server
-
-Add the following JSON snippet to the `mcpServers` object in the configuration file.
-
-```json
-"svelte": {
-  "command": "npx",
-  "args": [
-    "-y",
-    "@sveltejs/mcp"
-  ]
-}
-```
-
-#### Full Example
-
-If the file is empty, it should look like this:
+Explain suggested MCP servers in implementation plan and final output.
 
 ```json
 {
@@ -60,11 +42,28 @@ If the file is empty, it should look like this:
     "svelte": {
       "command": "npx",
       "args": ["-y", "@sveltejs/mcp"]
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "<GITHUB_PERSONAL_ACCESS_TOKEN>"
+      }
     }
   }
 }
 ```
 
-### Restart
+For each missing credentials/token explain separately where and how to obtain.
 
-Restart your IDE window or reload the agent to apply the changes.
+Explain developer has to merge json manually with ~/.gemini/antigravity/mcp_config.json for security reasons.
+
+# Docker Compose Alias
+
+Add following information exactly to implementation plan and final output:
+
+The project relies on `docker compose` (v2), but AI assistants often try to use the legacy `docker-compose` command. To prevent friction and errors, please add an alias to your shell configuration (`~/.zshrc`, `~/.bashrc`, etc.):
+
+```bash
+alias docker-compose="docker compose"
+```
