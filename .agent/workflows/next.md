@@ -25,17 +25,38 @@ Compare the Vision vs. Reality.
 
 ## 3. Suggestion Selection
 
-Decide on the **Next Step**.
+**If invoked with "low hanging fruits"**: Pick some small/medium, self-contained tasks.
 
-- **If invoked with "low hanging fruits"**: Pick some small/medium, self-contained tasks.
-- **Otherwise**: Pick the next most important features to move the template closer to the README/ADR vision.
+**Otherwise**: Pick the next most important features to move the template closer to the README/ADR vision.
 
 ## 4. Output Generation
 
-For each suggestion explain the **reason** and create a **prompt** that can be pasted to a new agent instance to execute this step.
+For each suggestion explain the **reason** and create a **prompt** that can be pasted to a new agent instance to execute this step. It's important to put the prompts into text artifacts (no markdown) for easy copying.
 
-The agent should start with a test instance according to @../rules/development.md
-The agent should keep the template repository on main.
-It's crucial that the agent asks for approval before backporting. After approval it should verify being on clean main, checkout a new branch, backport and make changes to the template repository.
+**CRITICAL: The generated prompt MUST follow this exact structure to ensure safety and consistency:**
 
-That allows to run several of these tasks in parallel with backporting as the only short bottleneck.
+### Prompt Template
+
+**Title**: [Task Name]
+
+**Reason**: [Why this is the next step]
+
+**Prompt**:
+You are tasked with [Task Description].
+
+1.  **Analyze & Clarify (IMPORTANT)**:
+    -   **Clarify**: Ask clarifying questions.
+    -   **New Technology**: Evaluate if new tools/tech are introduced. Research and suggest MCP servers. Check if `@../../template/%[cookiecutter.project_slug]%/.agent/workflows/onboarding.md` needs updates.
+    -   **Context**: Read relevant ADRs and READMEs.
+2.  **Plan**:
+    -   Create a detailed implementation plan.
+    -   Include the following parts as tasks in your implementation plan.
+3.  **Execute**:
+    -   **Safe Workspace**: Keep the template repository on `main`.
+    -   **Test Instance**: ALWAYS work in a test instance first using `/instantiate-template`.
+    -   Implement and verify changes in the test instance.
+4.  **Confirm & Backport**:
+    -   **Approval**: Show the user the result in the test instance and ask for approval.
+    -   **Clean State**: After approval, verify the template repo is on a clean `main` branch.
+    -   **Branching**: Checkout a new feature branch for the template.
+    -   **Backport**: Apply the changes to the template, preserving cookiecutter variables (`%[ ... ]%`).

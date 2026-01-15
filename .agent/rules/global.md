@@ -6,17 +6,17 @@ This repository contains a **cookiecutter template** for generating applications
 
 The template's rules apply to you if you change the template:
 
-Ref: @template/%[cookiecutter.project_slug]%/.agent/rules/global.md
-Ref: @template/%[cookiecutter.project_slug]%/.agent/rules/backend.md
-Ref: @template/%[cookiecutter.project_slug]%/.agent/rules/frontend.md
-Ref: @template/%[cookiecutter.project_slug]%/.agent/rules/protocols.md
-Ref: @template/%[cookiecutter.project_slug]%/.agent/rules/database.md
+Ref: @../../template/%[cookiecutter.project_slug]%/.agent/rules/global.md
+Ref: @../../template/%[cookiecutter.project_slug]%/.agent/rules/backend.md
+Ref: @../../template/%[cookiecutter.project_slug]%/.agent/rules/frontend.md
+Ref: @../../template/%[cookiecutter.project_slug]%/.agent/rules/protocols.md
+Ref: @../../template/%[cookiecutter.project_slug]%/.agent/rules/database.md
 
 ## Template Structure
 
 The source code for the generated project lives in `template/`.
 
-- `template/cookiecutter.json`: Defines the variables and default values.
+- @../../template/cookiecutter.json: Defines the variables and default values.
 - `template/%[cookiecutter.project_slug]%/`: The root of the cookiecutter template.
 
 ## Wording
